@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Guru - Aplikasi Presensi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="admin-login-container">
+        <h1>Akses Dasbor Guru</h1>
+        <form id="admin-login-form">
+            <input type="text" id="admin-id" placeholder="Masukkan ID Guru (NIP)" required>
+            <input type="password" id="admin-password" placeholder="Masukkan Password Guru" required>
+            <button type="submit">Masuk</button>
+        </form>
+        <p id="admin-login-message"></p>
+    </div>
+
+    <div id="dashboard-content" class="hidden">
+        <header>
+            <h1>Dasbor Guru</h1>
+            <p>Selamat datang, <strong id="guru-name"></strong>!</p>
+            <p>Laporan Presensi untuk tanggal: <span id="report-date"></span></p>
+        </header>
+
+        <main>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Siswa</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body">
+                    </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script src="guru.js"></script>
+</body>
+</html>
