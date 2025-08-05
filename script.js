@@ -21,35 +21,50 @@ loginForm.addEventListener('submit', function(event) {
     handleLogin();
 });
 
+// FUNGSI BARU UNTUK MEMBUAT ATAU MENGAMBIL ID PERANGKAT
+function getOrCreateDeviceId() {
+    let deviceId = localStorage.getItem('presensiDeviceId');
+    if (!deviceId) {
+        // Jika tidak ada, buat ID baru yang acak
+        deviceId = 'device-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('presensiDeviceId', deviceId);
+    }
+    return deviceId;
+}
+
 function handleLogin() {
     const studentId = document.getElementById('student-id').value;
     const password = document.getElementById('password').value;
+    const deviceId = getOrCreateDeviceId();
 
     loginMessage.textContent = 'Mencoba login...';
     loginMessage.style.color = 'gray';
 
-    fetch(API_URL + "?action=getFullSiswaData")
-        .then(response => response.json())
-        .then(result => {
-            if (result.status === 'success') {
-                const loggedInStudent = result.data.find(student =>
-                    student.id.toString() === studentId &&
-                    student.password.toString() === password
-                );
-                if (loggedInStudent) {
-                    currentUser = loggedInStudent;
-                    showDashboard();
-                } else {
-                    showLoginError("ID Siswa atau Password salah.");
-                }
-            } else {
-                showLoginError("Gagal mengambil data siswa dari server.");
-            }
-        })
-        .catch(error => {
-            console.error('Login error:', error);
-            showLoginError("Terjadi kesalahan. Cek koneksi internet.");
-        });
+    const payload = {
+        action: 'loginSiswa',
+        studentId: studentId,
+        password: password,
+        deviceId: deviceId
+    };
+
+    // Menggunakan metode POST untuk mengirim data login
+    fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            currentUser = result.data;
+            showDashboard();
+        } else {
+            showLoginError(result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        showLoginError("Terjadi kesalahan. Cek koneksi internet.");
+    });
 }
 
 function showDashboard() {
