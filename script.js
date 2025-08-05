@@ -1,5 +1,5 @@
 // URL API Anda sudah dimasukkan di sini
-const API_URL = "https://script.google.com/macros/s/AKfycbwjCoKRSEq8xMlIaYeinRlb1sBR122APj-OMMkDl5z6io6-2T2BxElJfY3C-dnNFi9I1g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwQIlyU82rTBMFdYvi4-u3pIPogaH2cBiRIlVYxuTGi_iKpJvs57tPjDH-MRVMqZR3ZQA/exec";
 
 // Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
@@ -100,15 +100,58 @@ function handlePresence(action) {
     presenceMessage.textContent = `Mencatat ${action}...`;
     presenceMessage.style.color = 'gray';
 
-    const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (action === 'checkin') {
+        // --- PROSES BARU UNTUK CHECK-IN DENGAN LOKASI ---
+        presenceMessage.textContent = 'Mendapatkan lokasi Anda...';
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => { // Jika berhasil mendapatkan lokasi
+                const payload = {
+                    action: 'checkin',
+                    studentId: currentUser.id,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
+                sendPresenceData(payload);
+            },
+            (error) => { // Jika gagal mendapatkan lokasi
+                let errorMessage = "Gagal mendapatkan lokasi: ";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += "Anda menolak izin lokasi.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += "Informasi lokasi tidak tersedia.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += "Waktu permintaan lokasi habis.";
+                        break;
+                    default:
+                        errorMessage += "Terjadi kesalahan tidak dikenal.";
+                        break;
+                }
+                presenceMessage.textContent = errorMessage;
+                presenceMessage.style.color = 'red';
+                checkInitialPresenceStatus(); // Kembalikan tombol ke state semula
+            }
+        );
+    } else if (action === 'checkout') {
+        // --- PROSES LAMA UNTUK CHECK-OUT (TANPA LOKASI) ---
+        const payload = {
+            action: 'checkout',
+            studentId: currentUser.id
+        };
+        sendPresenceData(payload);
+    }
+}
 
-    const payload = {
-        action: action,
-        studentId: currentUser.id,
-        checkInTime: action === 'checkin' ? currentTime : null,
-        checkOutTime: action === 'checkout' ? currentTime : null
-    };
+function showLoginError(message) {
+    loginMessage.textContent = message;
+    loginMessage.style.color = 'red';
+}
 
+// FUNGSI BARU UNTUK MENGIRIM DATA SETELAH SEMUA SIAP
+function sendPresenceData(payload) {
     fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -118,18 +161,12 @@ function handlePresence(action) {
         presenceMessage.textContent = result.message;
         presenceMessage.style.color = (result.status === 'success') ? 'green' : 'red';
         checkInitialPresenceStatus();
-    })
-    .catch(error => {
+    }).catch(error => {
         console.error('Presence error:', error);
         presenceMessage.textContent = "Error: Tidak bisa menghubungi server.";
         presenceMessage.style.color = 'red';
         checkInitialPresenceStatus();
     });
-}
-
-function showLoginError(message) {
-    loginMessage.textContent = message;
-    loginMessage.style.color = 'red';
 }
 
 // Menambahkan event listener pada tombol di dasbor
