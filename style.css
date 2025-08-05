@@ -2,33 +2,45 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f7f6;
     color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    line-height: 1.6;
     margin: 0;
+    padding: 20px;
 }
 
-#login-container, #dashboard-container {
+/* --- Style untuk Wadah Utama --- */
+#login-container, #dashboard-container, #admin-login-container, #dashboard-content {
     width: 100%;
-    max-width: 400px;
+    max-width: 800px; /* Lebarkan untuk dasbor */
+    margin: 20px auto;
     background-color: #ffffff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#login-container, #admin-login-container {
+    max-width: 400px; /* Perkecil untuk form login */
     text-align: center;
+}
+
+header, main {
+    padding: 0;
+    margin: 0;
 }
 
 h1, h2 {
     color: #0056b3;
+    text-align: center;
 }
 
-input {
-    width: calc(100% - 20px);
+/* --- Style untuk Form dan Tombol --- */
+input[type="text"], input[type="number"], input[type="password"], input[type="date"] {
+    width: calc(100% - 22px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 16px;
 }
 
 button {
@@ -52,11 +64,54 @@ button:hover:not(:disabled) {
     background-color: #0056b3;
 }
 
-#login-message, #presence-message {
+/* --- Style untuk Pesan dan Utility --- */
+#login-message, #presence-message, #admin-login-message {
     margin-top: 15px;
     font-weight: bold;
 }
 
 .hidden {
     display: none;
+}
+
+/* --- Style untuk Dasbor Guru --- */
+.date-picker-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.date-picker-container label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.status-terlambat {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.status-hadir {
+    color: #5cb85c;
 }
