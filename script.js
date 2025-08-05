@@ -1,5 +1,5 @@
 // URL API Anda sudah dimasukkan di sini
-const API_URL = "https://script.google.com/macros/s/AKfycbyVwgSZZV7I2oKYkfaNN3HQ_E0LlzL7jOdqSu6WBLF1GEy71299rnCEPSpqWtY9rxUuig/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbylP6iZCHQesQHRq7KkwFzaAlGEJF15aJIQEagzY10f8LCBE4DK6l_MIPY66u-u4kAKPA/exec";
 
 // Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
