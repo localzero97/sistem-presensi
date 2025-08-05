@@ -1,5 +1,5 @@
 // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbycUVe1Hm580I8665Jwj9NKKnM3LBspKGwvP6Vjt5UvZ7QS8UiUQrwCKsIdJAsn3VEjlw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyT6X5bUEmxBBdz5957bA01gLnY3nII_fzYCgNGGSXTUs9hmtSq1irNId7DVuvsFx2YnQ/exec";
 
 // Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
@@ -11,6 +11,7 @@ const loginForm = document.getElementById('login-form');
 const loginMessage = document.getElementById('login-message');
 const dashboardWelcome = document.getElementById('dashboard-welcome');
 const checkInBtn = document.getElementById('check-in-btn');
+const checkOutBtn = document.getElementById('check-out-btn');
 const presenceMessage = document.getElementById('presence-message');
 
 // Menambahkan event listener ke form login
@@ -34,9 +35,8 @@ function handleLogin() {
                     student.id.toString() === studentId && 
                     student.password.toString() === password
                 );
-
                 if (loggedInStudent) {
-                    currentUser = loggedInStudent; // Simpan data siswa yang login
+                    currentUser = loggedInStudent;
                     showDashboard();
                 } else {
                     showLoginError("ID Siswa atau Password salah.");
@@ -56,8 +56,9 @@ function showDashboard() {
     dashboardContainer.classList.remove('hidden');
     dashboardWelcome.textContent = `Selamat Datang, ${currentUser.nama}!`;
     
-    // Menambahkan fungsi pada tombol check-in SETELAH login berhasil
-    checkInBtn.addEventListener('click', handleCheckIn);
+    // Menambahkan fungsi pada kedua tombol
+    checkInBtn.addEventListener('click', () => handlePresence('checkin'));
+    checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
 }
 
 function showLoginError(message) {
@@ -65,39 +66,53 @@ function showLoginError(message) {
     loginMessage.style.color = 'red';
 }
 
-// FUNGSI BARU UNTUK MENANGANI PROSES CHECK-IN
-function handleCheckIn() {
-    checkInBtn.disabled = true; // Nonaktifkan tombol untuk mencegah klik ganda
-    presenceMessage.textContent = 'Mencatat kehadiran...';
+// FUNGSI UTAMA UNTUK MENGIRIM DATA KEHADIRAN (CHECK-IN & CHECK-OUT)
+function handlePresence(action) {
+    // Nonaktifkan kedua tombol untuk mencegah klik ganda
+    checkInBtn.disabled = true;
+    checkOutBtn.disabled = true;
+    presenceMessage.textContent = `Mencatat ${action}...`;
     presenceMessage.style.color = 'gray';
 
     const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     const payload = {
+        action: action, // 'checkin' atau 'checkout'
         studentId: currentUser.id,
-        checkInTime: currentTime
+        checkInTime: action === 'checkin' ? currentTime : null,
+        checkOutTime: action === 'checkout' ? currentTime : null
     };
 
-    // Mengirim data ke backend menggunakan metode POST
     fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
     })
     .then(response => response.json())
     .then(result => {
+        presenceMessage.textContent = result.message;
         if (result.status === 'success') {
-            presenceMessage.textContent = result.message;
             presenceMessage.style.color = 'green';
+            // Perbarui tampilan tombol berdasarkan aksi yang berhasil
+            if (action === 'checkin') {
+                checkInBtn.disabled = true;
+                checkOutBtn.disabled = false; // Aktifkan tombol check-out
+            } else if (action === 'checkout') {
+                checkInBtn.disabled = true;
+                checkOutBtn.disabled = true; // Nonaktifkan keduanya jika sudah selesai
+            }
         } else {
-            presenceMessage.textContent = result.message;
             presenceMessage.style.color = 'red';
-            checkInBtn.disabled = false; // Aktifkan lagi jika gagal
+            // Jika gagal karena aturan waktu, tombol check-in tetap non-aktif
+            // tapi tombol check-out bisa jadi aktif jika sudah waktunya
+            // Untuk sementara kita buat sederhana:
+            checkInBtn.disabled = false; 
+            checkOutBtn.disabled = true;
         }
     })
     .catch(error => {
-        console.error('Check-in error:', error);
+        console.error('Presence error:', error);
         presenceMessage.textContent = "Error: Tidak bisa menghubungi server.";
         presenceMessage.style.color = 'red';
-        checkInBtn.disabled = false; // Aktifkan lagi jika gagal
+        checkInBtn.disabled = false;
     });
 }
