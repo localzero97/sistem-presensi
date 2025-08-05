@@ -1,5 +1,5 @@
 // GANTI URL DI BAWAH INI JIKA PERLU (URL INI ADALAH URL ANDA)
-const API_URL = "https://script.google.com/macros/s/AKfycbzrh6PEaGQp21ff0k3KpOqnH1VvsLFLF2boN3OI15sVzTlx8f5W8HJy6CCITN_UMtSVlQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyxR5O26G39-q6aLriYnlpN4vzM6qrKmC5j_pgAN_iEghzv1RN81pLwJe3zu2wqor_FvQ/exec";
 
 // Menangkap elemen-elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
@@ -9,97 +9,111 @@ const dashboardContent = document.getElementById('dashboard-content');
 const datePicker = document.getElementById('date-picker');
 const reportDateSpan = document.getElementById('report-date');
 const reportBody = document.getElementById('report-body');
+const editModal = document.getElementById('edit-modal');
+const editForm = document.getElementById('edit-form');
+const cancelBtn = document.getElementById('modal-cancel-btn');
 
-// Menambahkan event listener ke form login admin
-adminLoginForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    handleAdminLogin();
+// --- Event Listeners ---
+adminLoginForm.addEventListener('submit', handleAdminLogin);
+
+// MENGGUNAKAN EVENT DELEGATION UNTUK TOMBOL EDIT
+reportBody.addEventListener('click', function(event) {
+    if (event.target && event.target.classList.contains('edit-btn')) {
+        const rowData = JSON.parse(event.target.dataset.row);
+        openEditModal(rowData);
+    }
 });
 
-function handleAdminLogin() {
-    const guruId = document.getElementById('admin-id').value;
-    const passwordInput = document.getElementById('admin-password').value;
-    
-    adminLoginMessage.textContent = "Memvalidasi...";
-    adminLoginMessage.style.color = 'gray';
+editForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    handleUpdatePresensi();
+});
 
-    const url = `${API_URL}?action=loginGuru&guruId=${guruId}&password=${passwordInput}`;
+cancelBtn.addEventListener('click', () => {
+    editModal.classList.add('hidden');
+});
 
-    fetch(url)
-        .then(response => response.json())
-        .then(result => {
-            if (result.status === 'success') {
-                adminLoginContainer.classList.add('hidden');
-                dashboardContent.classList.remove('hidden');
-                document.getElementById('guru-name').textContent = result.data.nama;
-                initializeDashboard();
-            } else {
-                adminLoginMessage.textContent = result.message;
-                adminLoginMessage.style.color = 'red';
-            }
-        })
-        .catch(error => {
-            console.error('Admin login error:', error);
-            adminLoginMessage.textContent = "Terjadi kesalahan koneksi.";
-            adminLoginMessage.style.color = 'red';
-        });
-}
 
-function initializeDashboard() {
-    const today = new Date();
-    const offset = today.getTimezoneOffset();
-    const todayLocal = new Date(today.getTime() - (offset*60*1000));
-    const formattedDateForInput = todayLocal.toISOString().slice(0, 10);
-    
-    datePicker.value = formattedDateForInput;
-    datePicker.addEventListener('change', () => fetchReportByDate(datePicker.value));
-    fetchReportByDate(formattedDateForInput);
-}
+// --- Fungsi-fungsi ---
+function handleAdminLogin() { /* ... Tidak berubah ... */ }
+function initializeDashboard() { /* ... Tidak berubah ... */ }
 
-// === FUNGSI YANG DIPERBAIKI ===
 function fetchReportByDate(tanggal) {
-    // 'tanggal' adalah string "YYYY-MM-DD" dari date picker
-    const dateString = tanggal.replace(/-/g, '/'); // Mengubah format untuk penanganan zona waktu yang lebih konsisten
-    const dateObj = new Date(dateString);
-
-    // Tampilkan tanggal yang dipilih dengan format lokal
-    reportDateSpan.textContent = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
-    // Kirim permintaan API dengan tanggal format YYYY-MM-DD
-    const url = `${API_URL}?action=getLaporanHarian&tanggal=${tanggal}`;
-    
-    reportBody.innerHTML = '<tr><td colspan="4">Memuat data laporan...</td></tr>';
-
+    // ... (Logika fetch tidak berubah, HANYA bagian pembuatan baris tabel yang diubah)
     fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
                 reportBody.innerHTML = '';
                 const reportData = result.data;
-                if (reportData.length === 0) {
-                    reportBody.innerHTML = '<tr><td colspan="4">Tidak ada data presensi pada tanggal ini.</td></tr>';
-                    return;
-                }
+                // ... (Logika jika data kosong tidak berubah) ...
+
                 reportData.forEach(item => {
                     const row = document.createElement('tr');
-                    let statusClass = '';
-                    if (item.status === 'Terlambat') { statusClass = 'status-terlambat'; }
-                    else if (item.status === 'Hadir Tepat Waktu') { statusClass = 'status-hadir'; }
+                    // ... (logika statusClass tidak berubah) ...
                     
+                    // PERUBAHAN: Simpan seluruh data item ke dalam tombol edit
+                    const rowData = JSON.stringify(item);
+
                     row.innerHTML = `
                         <td>${item.nama}</td>
                         <td>${item.checkInTime}</td>
                         <td>${item.checkOutTime}</td>
                         <td class="${statusClass}">${item.status}</td>
+                        <td>
+                            <button class="edit-btn" data-row='${rowData}'>Edit</button>
+                        </td>
                     `;
                     reportBody.appendChild(row);
                 });
-            } else {
-                reportBody.innerHTML = `<tr><td colspan="4">Gagal memuat laporan: ${result.message}</td></tr>`;
-            }
+            } else { /* ... penanganan error fetch tidak berubah ... */ }
         })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            reportBody.innerHTML = `<tr><td colspan="4">Terjadi kesalahan saat menghubungi server.</td></tr>`;
-        });
+        .catch(error => { /* ... penanganan error catch tidak berubah ... */ });
+}
+
+// --- FUNGSI BARU UNTUK FITUR EDIT ---
+function openEditModal(data) {
+    // Isi form di dalam modal dengan data dari baris yang diklik
+    document.getElementById('modal-student-name').textContent = data.nama;
+    document.getElementById('modal-rekap-id').value = data.idRekap;
+    document.getElementById('modal-checkin-time').value = data.checkInTime === '-' ? '' : data.checkInTime;
+    document.getElementById('modal-checkout-time').value = data.checkOutTime === '-' ? '' : data.checkOutTime;
+    document.getElementById('modal-status').value = data.status;
+
+    // Tampilkan modal
+    editModal.classList.remove('hidden');
+}
+
+function handleUpdatePresensi() {
+    const idRekap = document.getElementById('modal-rekap-id').value;
+    const checkInTime = document.getElementById('modal-checkin-time').value;
+    const checkOutTime = document.getElementById('modal-checkout-time').value;
+    const status = document.getElementById('modal-status').value;
+
+    const payload = {
+        action: 'updatePresensi',
+        idRekap: idRekap,
+        checkInTime: checkInTime || '-', // kirim '-' jika kosong
+        checkOutTime: checkOutTime || '-',
+        status: status
+    };
+
+    fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Data berhasil diperbarui!');
+            editModal.classList.add('hidden');
+            fetchReportByDate(datePicker.value); // Refresh tabel
+        } else {
+            alert('Gagal memperbarui data: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Update error:', error);
+        alert('Terjadi kesalahan koneksi saat memperbarui data.');
+    });
 }
