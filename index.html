@@ -3,21 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Presensi</title>
+    <title>Login - Aplikasi Presensi</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>Aplikasi Presensi Siswa</h1>
-        <p>Selasa, 5 Agustus 2025</p> </header>
+    <div id="login-container">
+        <h1>Silakan Login</h1>
+        <form id="login-form">
+            <input type="number" id="student-id" placeholder="Masukkan ID Siswa (NIS)" required>
+            <input type="password" id="password" placeholder="Masukkan Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="login-message"></p>
+    </div>
 
-    <main>
-        <h2>Daftar Siswa</h2>
-        <ul id="student-list">
-            <li>Memuat data siswa...</li>
-        </ul>
-    </main>
+    <div id="dashboard-container" class="hidden">
+        <header>
+            <h1 id="dashboard-welcome"></h1>
+            <p id="current-time"></p>
+        </header>
+        <main>
+            <h2>Aksi Presensi</h2>
+            <button id="check-in-btn">Check-In Sekarang</button>
+            <button id="check-out-btn" disabled>Check-Out Sekarang</button>
+            <p id="presence-message"></p>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
