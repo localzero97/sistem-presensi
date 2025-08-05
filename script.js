@@ -1,5 +1,5 @@
 // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbzmGFX8EDyjKd1vkkUD9Le3TR8MCWyvq5mVyDW4aQxWxwTeBm7ME34K0l5y16UmIP9Zhg/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbziX0ZdrK8tL0UAPmVOppkLPGCJf9POzBtQiETMqePvydyXFEsV6YHmk1_b8jwWlSxY9g/exec"; 
 
 // Fungsi ini akan berjalan ketika halaman web selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
