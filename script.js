@@ -1,54 +1,17 @@
 // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbyT6X5bUEmxBBdz5957bA01gLnY3nII_fzYCgNGGSXTUs9hmtSq1irNId7DVuvsFx2YnQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxR55HFsDei68Ze7LEFcSTgnV6qUI3TXHXCOgZPaEXrhCbo62o-1CV6GNNG-rr35v5noA/exec";
 
-// Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
 
-// Menangkap elemen-elemen dari HTML
-const loginContainer = document.getElementById('login-container');
-const dashboardContainer = document.getElementById('dashboard-container');
-const loginForm = document.getElementById('login-form');
-const loginMessage = document.getElementById('login-message');
-const dashboardWelcome = document.getElementById('dashboard-welcome');
-const checkInBtn = document.getElementById('check-in-btn');
-const checkOutBtn = document.getElementById('check-out-btn');
-const presenceMessage = document.getElementById('presence-message');
+// ... (Tangkap elemen-elemen HTML, kode sama seperti sebelumnya) ...
 
-// Menambahkan event listener ke form login
 loginForm.addEventListener('submit', function(event) {
     event.preventDefault();
     handleLogin();
 });
 
 function handleLogin() {
-    const studentId = document.getElementById('student-id').value;
-    const password = document.getElementById('password').value;
-
-    loginMessage.textContent = 'Mencoba login...';
-    loginMessage.style.color = 'gray';
-
-    fetch(API_URL + "?action=getFullSiswaData")
-        .then(response => response.json())
-        .then(result => {
-            if (result.status === 'success') {
-                const loggedInStudent = result.data.find(student => 
-                    student.id.toString() === studentId && 
-                    student.password.toString() === password
-                );
-                if (loggedInStudent) {
-                    currentUser = loggedInStudent;
-                    showDashboard();
-                } else {
-                    showLoginError("ID Siswa atau Password salah.");
-                }
-            } else {
-                showLoginError("Gagal mengambil data siswa.");
-            }
-        })
-        .catch(error => {
-            console.error('Login error:', error);
-            showLoginError("Terjadi kesalahan. Cek koneksi internet.");
-        });
+    // ... (Fungsi login tidak berubah) ...
 }
 
 function showDashboard() {
@@ -56,33 +19,50 @@ function showDashboard() {
     dashboardContainer.classList.remove('hidden');
     dashboardWelcome.textContent = `Selamat Datang, ${currentUser.nama}!`;
     
-    // Menambahkan fungsi pada kedua tombol
-    checkInBtn.addEventListener('click', () => handlePresence('checkin'));
-    checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
+    // PANGGIL FUNGSI BARU UNTUK CEK STATUS
+    checkInitialPresenceStatus(); 
 }
 
-function showLoginError(message) {
-    loginMessage.textContent = message;
-    loginMessage.style.color = 'red';
-}
-
-// FUNGSI UTAMA UNTUK MENGIRIM DATA KEHADIRAN (CHECK-IN & CHECK-OUT)
-function handlePresence(action) {
-    // Nonaktifkan kedua tombol untuk mencegah klik ganda
-    checkInBtn.disabled = true;
-    checkOutBtn.disabled = true;
-    presenceMessage.textContent = `Mencatat ${action}...`;
+// --- FUNGSI BARU UNTUK MENGECEK STATUS AWAL SAAT LOGIN ---
+function checkInitialPresenceStatus() {
+    presenceMessage.textContent = 'Mengecek status kehadiran...';
     presenceMessage.style.color = 'gray';
 
-    const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    fetch(`${API_URL}?action=getTodaysStatus&id=${currentUser.id}`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                updateButtonState(result.data); // Update tombol berdasarkan data
+                presenceMessage.textContent = ''; // Kosongkan pesan status
+            } else {
+                presenceMessage.textContent = 'Gagal mengecek status.';
+                presenceMessage.style.color = 'red';
+            }
+        });
+}
 
-    const payload = {
-        action: action, // 'checkin' atau 'checkout'
-        studentId: currentUser.id,
-        checkInTime: action === 'checkin' ? currentTime : null,
-        checkOutTime: action === 'checkout' ? currentTime : null
-    };
+// --- FUNGSI BARU UNTUK MENGATUR TOMBOL ---
+function updateButtonState(presenceData) {
+    if (presenceData) { // Jika ada data presensi hari ini
+        if (presenceData.checkOutTime) { // Jika sudah check-out
+            checkInBtn.disabled = true;
+            checkOutBtn.disabled = true;
+            presenceMessage.textContent = `Presensi hari ini selesai. Check-in pukul ${presenceData.checkInTime}, Check-out pukul ${presenceData.checkOutTime}.`;
+        } else { // Jika sudah check-in tapi belum check-out
+            checkInBtn.disabled = true;
+            checkOutBtn.disabled = false;
+            presenceMessage.textContent = `Anda sudah check-in pada pukul ${presenceData.checkInTime}. Silakan check-out jika sudah waktunya.`;
+        }
+    } else { // Jika belum ada data sama sekali (belum check-in)
+        checkInBtn.disabled = false;
+        checkOutBtn.disabled = true;
+        presenceMessage.textContent = 'Anda belum melakukan check-in hari ini.';
+    }
+}
 
+
+function handlePresence(action) {
+    // ... (Fungsi handlePresence hampir sama, hanya bagian suksesnya yang diubah) ...
     fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -92,27 +72,17 @@ function handlePresence(action) {
         presenceMessage.textContent = result.message;
         if (result.status === 'success') {
             presenceMessage.style.color = 'green';
-            // Perbarui tampilan tombol berdasarkan aksi yang berhasil
-            if (action === 'checkin') {
-                checkInBtn.disabled = true;
-                checkOutBtn.disabled = false; // Aktifkan tombol check-out
-            } else if (action === 'checkout') {
-                checkInBtn.disabled = true;
-                checkOutBtn.disabled = true; // Nonaktifkan keduanya jika sudah selesai
-            }
+            // Panggil fungsi pengecekan status lagi untuk mendapatkan data terbaru dan update tombol
+            checkInitialPresenceStatus(); 
         } else {
             presenceMessage.style.color = 'red';
-            // Jika gagal karena aturan waktu, tombol check-in tetap non-aktif
-            // tapi tombol check-out bisa jadi aktif jika sudah waktunya
-            // Untuk sementara kita buat sederhana:
-            checkInBtn.disabled = false; 
-            checkOutBtn.disabled = true;
+            // Jika gagal, kembalikan status tombol ke keadaan sebelum aksi
+            checkInitialPresenceStatus();
         }
     })
-    .catch(error => {
-        console.error('Presence error:', error);
-        presenceMessage.textContent = "Error: Tidak bisa menghubungi server.";
-        presenceMessage.style.color = 'red';
-        checkInBtn.disabled = false;
-    });
+    // ... (Bagian .catch tetap sama) ...
 }
+
+
+// Pastikan semua fungsi lain (handleLogin, showLoginError, dll.) masih ada.
+// Salin tempel seluruh kode dari file Anda yang terakhir, lalu modifikasi/tambahkan fungsi-fungsi di atas.
