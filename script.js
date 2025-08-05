@@ -15,6 +15,7 @@ const checkOutBtn = document.getElementById('check-out-btn');
 const presenceMessage = document.getElementById('presence-message');
 
 // Menambahkan event listener ke form login
+// Pastikan variabel di sini (loginForm) sama persis dengan yang dideklarasikan di atas
 loginForm.addEventListener('submit', function(event) {
     event.preventDefault(); // Mencegah halaman me-refresh
     handleLogin();
@@ -27,7 +28,6 @@ function handleLogin() {
     loginMessage.textContent = 'Mencoba login...';
     loginMessage.style.color = 'gray';
 
-    // Mengambil data lengkap siswa untuk verifikasi login
     fetch(API_URL + "?action=getFullSiswaData")
         .then(response => response.json())
         .then(result => {
@@ -56,22 +56,18 @@ function showDashboard() {
     loginContainer.classList.add('hidden');
     dashboardContainer.classList.remove('hidden');
     dashboardWelcome.textContent = `Selamat Datang, ${currentUser.nama}!`;
-
-    // Saat dasbor ditampilkan, langsung cek status kehadiran hari ini
     checkInitialPresenceStatus();
 }
 
-// Fungsi untuk mengecek status awal saat login
 function checkInitialPresenceStatus() {
     presenceMessage.textContent = 'Mengecek status kehadiran...';
     presenceMessage.style.color = 'gray';
 
-    // Bertanya ke API mengenai status siswa yang login hari ini
     fetch(`${API_URL}?action=getTodaysStatus&id=${currentUser.id}`)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                updateButtonState(result.data); // Update tombol berdasarkan data
+                updateButtonState(result.data);
             } else {
                 presenceMessage.textContent = 'Gagal mengecek status kehadiran.';
                 presenceMessage.style.color = 'red';
@@ -79,29 +75,25 @@ function checkInitialPresenceStatus() {
         });
 }
 
-// Fungsi untuk mengatur keadaan tombol berdasarkan data presensi
 function updateButtonState(presenceData) {
-    // Reset pesan status awal
     presenceMessage.textContent = '';
-
-    if (presenceData) { // Jika ada data presensi hari ini
-        if (presenceData.checkOutTime) { // Jika sudah check-out
+    if (presenceData) {
+        if (presenceData.checkOutTime) {
             checkInBtn.disabled = true;
             checkOutBtn.disabled = true;
             presenceMessage.textContent = `Presensi hari ini selesai. Check-in pukul ${presenceData.checkInTime}, Check-out pukul ${presenceData.checkOutTime}.`;
-        } else { // Jika sudah check-in tapi belum check-out
+        } else {
             checkInBtn.disabled = true;
             checkOutBtn.disabled = false;
             presenceMessage.textContent = `Anda sudah check-in pada pukul ${presenceData.checkInTime}. Silakan check-out jika sudah waktunya.`;
         }
-    } else { // Jika belum ada data sama sekali (belum check-in)
+    } else {
         checkInBtn.disabled = false;
         checkOutBtn.disabled = true;
         presenceMessage.textContent = 'Anda belum melakukan check-in hari ini.';
     }
 }
 
-// Fungsi utama untuk mengirim data kehadiran (Check-in & Check-out)
 function handlePresence(action) {
     checkInBtn.disabled = true;
     checkOutBtn.disabled = true;
@@ -123,17 +115,14 @@ function handlePresence(action) {
     })
     .then(response => response.json())
     .then(result => {
-        // Apapun hasilnya (sukses/gagal), kita cek ulang status terakhir untuk update UI
-        checkInitialPresenceStatus(); 
-        // Tampilkan pesan dari server
         presenceMessage.textContent = result.message;
         presenceMessage.style.color = (result.status === 'success') ? 'green' : 'red';
+        checkInitialPresenceStatus();
     })
     .catch(error => {
         console.error('Presence error:', error);
         presenceMessage.textContent = "Error: Tidak bisa menghubungi server.";
         presenceMessage.style.color = 'red';
-        // Jika gagal, cek ulang status untuk mengembalikan tombol ke keadaan semula
         checkInitialPresenceStatus();
     });
 }
@@ -143,8 +132,6 @@ function showLoginError(message) {
     loginMessage.style.color = 'red';
 }
 
-// Menambahkan event listener pada tombol SETELAH semua fungsi dideklarasikan
-document.addEventListener('DOMContentLoaded', () => {
-    checkInBtn.addEventListener('click', () => handlePresence('checkin'));
-    checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
-});
+// Menambahkan event listener pada tombol di dasbor
+checkInBtn.addEventListener('click', () => handlePresence('checkin'));
+checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
