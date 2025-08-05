@@ -35,40 +35,12 @@
                         <th>Check-In</th>
                         <th>Check-Out</th>
                         <th>Status</th>
-                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="report-body"></tbody>
             </table>
         </main>
     </div>
-
-    <div id="edit-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <h2>Edit Presensi</h2>
-            <p><strong>Siswa:</strong> <span id="modal-student-name"></span></p>
-            <form id="edit-form">
-                <input type="hidden" id="modal-rekap-id">
-                <label for="modal-checkin-time">Waktu Check-In (HH:mm):</label>
-                <input type="text" id="modal-checkin-time" placeholder="HH:mm">
-                <label for="modal-checkout-time">Waktu Check-Out (HH:mm):</label>
-                <input type="text" id="modal-checkout-time" placeholder="HH:mm">
-                <label for="modal-status">Status Kehadiran:</label>
-                <select id="modal-status">
-                    <option value="Hadir Tepat Waktu">Hadir Tepat Waktu</option>
-                    <option value="Terlambat">Terlambat</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Alfa">Alfa</option>
-                </select>
-                <div class="modal-actions">
-                    <button type="submit">Simpan Perubahan</button>
-                    <button type="button" id="modal-cancel-btn">Batal</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script src="guru.js"></script>
 </body>
 </html>
