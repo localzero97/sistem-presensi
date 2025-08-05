@@ -1,5 +1,5 @@
 // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "PASTE_URL_API_ANDA_DI_SINI";
+const API_URL = "https://script.google.com/macros/s/AKfycbzHFdkSrvmwjEpX1yLuNp9Qqetc50uY8SRxn18zabKQN2mgfpPok5Hoj3SW57TyCMt-5A/exec";
 
 // Menangkap elemen-elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
