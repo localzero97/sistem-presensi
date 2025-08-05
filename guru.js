@@ -1,5 +1,7 @@
+// GANTI URL DI BAWAH INI JIKA PERLU (URL INI ADALAH URL ANDA)
 const API_URL = "https://script.google.com/macros/s/AKfycbzrh6PEaGQp21ff0k3KpOqnH1VvsLFLF2boN3OI15sVzTlx8f5W8HJy6CCITN_UMtSVlQ/exec";
 
+// Menangkap elemen-elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
 const adminLoginForm = document.getElementById('admin-login-form');
 const adminLoginMessage = document.getElementById('admin-login-message');
@@ -8,6 +10,7 @@ const datePicker = document.getElementById('date-picker');
 const reportDateSpan = document.getElementById('report-date');
 const reportBody = document.getElementById('report-body');
 
+// Menambahkan event listener ke form login admin
 adminLoginForm.addEventListener('submit', function(event) {
     event.preventDefault();
     handleAdminLogin();
@@ -53,11 +56,16 @@ function initializeDashboard() {
     fetchReportByDate(formattedDateForInput);
 }
 
+// === FUNGSI YANG DIPERBAIKI ===
 function fetchReportByDate(tanggal) {
-    const dateObj = new Date(tanggal);
-    const displayDate = new Date(dateObj.getTime() + (24 * 60 * 60 * 1000)); 
-    reportDateSpan.textContent = displayDate.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    // 'tanggal' adalah string "YYYY-MM-DD" dari date picker
+    const dateString = tanggal.replace(/-/g, '/'); // Mengubah format untuk penanganan zona waktu yang lebih konsisten
+    const dateObj = new Date(dateString);
+
+    // Tampilkan tanggal yang dipilih dengan format lokal
+    reportDateSpan.textContent = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
+    // Kirim permintaan API dengan tanggal format YYYY-MM-DD
     const url = `${API_URL}?action=getLaporanHarian&tanggal=${tanggal}`;
     
     reportBody.innerHTML = '<tr><td colspan="4">Memuat data laporan...</td></tr>';
