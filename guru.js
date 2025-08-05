@@ -1,15 +1,15 @@
-// GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbzHFdkSrvmwjEpX1yLuNp9Qqetc50uY8SRxn18zabKQN2mgfpPok5Hoj3SW57TyCMt-5A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzrh6PEaGQp21ff0k3KpOqnH1VvsLFLF2boN3OI15sVzTlx8f5W8HJy6CCITN_UMtSVlQ/exec";
 
-// Menangkap elemen-elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
 const adminLoginForm = document.getElementById('admin-login-form');
 const adminLoginMessage = document.getElementById('admin-login-message');
 const dashboardContent = document.getElementById('dashboard-content');
+const datePicker = document.getElementById('date-picker');
+const reportDateSpan = document.getElementById('report-date');
+const reportBody = document.getElementById('report-body');
 
-// Menambahkan event listener ke form login admin
 adminLoginForm.addEventListener('submit', function(event) {
-    event.preventDefault(); // Mencegah form me-refresh halaman
+    event.preventDefault();
     handleAdminLogin();
 });
 
@@ -20,24 +20,17 @@ function handleAdminLogin() {
     adminLoginMessage.textContent = "Memvalidasi...";
     adminLoginMessage.style.color = 'gray';
 
-    // Membuat URL untuk bertanya ke API
     const url = `${API_URL}?action=loginGuru&guruId=${guruId}&password=${passwordInput}`;
 
     fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                // Jika login berhasil, sembunyikan form dan tampilkan dasbor
                 adminLoginContainer.classList.add('hidden');
                 dashboardContent.classList.remove('hidden');
-                
-                // Sapa guru yang berhasil login
                 document.getElementById('guru-name').textContent = result.data.nama;
-                
-                // Setelah itu, baru ambil data laporan
-                fetchTodaysReport();
+                initializeDashboard();
             } else {
-                // Jika gagal, tampilkan pesan error
                 adminLoginMessage.textContent = result.message;
                 adminLoginMessage.style.color = 'red';
             }
@@ -49,45 +42,41 @@ function handleAdminLogin() {
         });
 }
 
-function fetchTodaysReport() {
-    // 1. Dapatkan tanggal hari ini dalam format YYYY-MM-DD
+function initializeDashboard() {
     const today = new Date();
-    // Menggunakan trik sederhana untuk mendapatkan YYYY-MM-DD yang sesuai dengan zona waktu lokal
     const offset = today.getTimezoneOffset();
     const todayLocal = new Date(today.getTime() - (offset*60*1000));
-    const formattedDate = todayLocal.toISOString().slice(0, 10);
+    const formattedDateForInput = todayLocal.toISOString().slice(0, 10);
     
-    // Tampilkan tanggal di header
-    document.getElementById('report-date').textContent = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    datePicker.value = formattedDateForInput;
+    datePicker.addEventListener('change', () => fetchReportByDate(datePicker.value));
+    fetchReportByDate(formattedDateForInput);
+}
+
+function fetchReportByDate(tanggal) {
+    const dateObj = new Date(tanggal);
+    const displayDate = new Date(dateObj.getTime() + (24 * 60 * 60 * 1000)); 
+    reportDateSpan.textContent = displayDate.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
-    const url = `${API_URL}?action=getLaporanHarian&tanggal=${formattedDate}`;
-    const reportBody = document.getElementById('report-body');
+    const url = `${API_URL}?action=getLaporanHarian&tanggal=${tanggal}`;
     
     reportBody.innerHTML = '<tr><td colspan="4">Memuat data laporan...</td></tr>';
 
-    // 2. Panggil API untuk mendapatkan data laporan
     fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                reportBody.innerHTML = ''; // Kosongkan tabel
+                reportBody.innerHTML = '';
                 const reportData = result.data;
-
                 if (reportData.length === 0) {
-                    reportBody.innerHTML = '<tr><td colspan="4">Belum ada data presensi untuk hari ini.</td></tr>';
+                    reportBody.innerHTML = '<tr><td colspan="4">Tidak ada data presensi pada tanggal ini.</td></tr>';
                     return;
                 }
-
-                // 3. Tampilkan setiap baris data ke dalam tabel
                 reportData.forEach(item => {
                     const row = document.createElement('tr');
-                    // Memberi warna pada status untuk kemudahan membaca
                     let statusClass = '';
-                    if (item.status === 'Terlambat') {
-                        statusClass = 'status-terlambat';
-                    } else if (item.status === 'Hadir Tepat Waktu') {
-                        statusClass = 'status-hadir';
-                    }
+                    if (item.status === 'Terlambat') { statusClass = 'status-terlambat'; }
+                    else if (item.status === 'Hadir Tepat Waktu') { statusClass = 'status-hadir'; }
                     
                     row.innerHTML = `
                         <td>${item.nama}</td>
@@ -97,7 +86,6 @@ function fetchTodaysReport() {
                     `;
                     reportBody.appendChild(row);
                 });
-
             } else {
                 reportBody.innerHTML = `<tr><td colspan="4">Gagal memuat laporan: ${result.message}</td></tr>`;
             }
