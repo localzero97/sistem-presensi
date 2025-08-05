@@ -1,38 +1,67 @@
 // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbziX0ZdrK8tL0UAPmVOppkLPGCJf9POzBtQiETMqePvydyXFEsV6YHmk1_b8jwWlSxY9g/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbwXT_KbmO0MX-GsYU2xeXII4dfhWPqbMbUDQYsNDJrD4pkKEi1CBV4oVOElER2kPP4Wqg/exec";
 
-// Fungsi ini akan berjalan ketika halaman web selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    fetchStudentList();
+// Menangkap elemen-elemen dari HTML
+const loginContainer = document.getElementById('login-container');
+const dashboardContainer = document.getElementById('dashboard-container');
+const loginForm = document.getElementById('login-form');
+const loginMessage = document.getElementById('login-message');
+const dashboardWelcome = document.getElementById('dashboard-welcome');
+
+// Menambahkan event listener ke form login
+loginForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Mencegah form mengirim data dan me-refresh halaman
+    handleLogin();
 });
 
-// Fungsi untuk mengambil data siswa dari API kita
-function fetchStudentList() {
-    // Menambahkan parameter 'action' sesuai dengan desain API kita
-    const url_dengan_aksi = API_URL + "?action=getSiswaList";
+function handleLogin() {
+    const studentId = document.getElementById('student-id').value;
+    const password = document.getElementById('password').value;
 
-    fetch(url_dengan_aksi)
-        .then(response => response.json()) // Mengubah respons menjadi format JSON
-        .then(data => {
-            // Setelah data berhasil didapat
-            console.log(data); // Menampilkan data di console untuk debugging
-            const studentListElement = document.getElementById('student-list');
-            studentListElement.innerHTML = ''; // Mengosongkan tulisan "Memuat data..."
+    loginMessage.textContent = 'Mencoba login...';
+    loginMessage.style.color = 'gray';
 
-            // Mengambil array siswa dari properti 'data'
-            const students = data.data;
+    // Memanggil API dengan aksi baru untuk mendapatkan data lengkap siswa
+    fetch(API_URL + "?action=getFullSiswaData")
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                // Mencari siswa berdasarkan ID dan Password yang dimasukkan
+                const loggedInStudent = result.data.find(student => 
+                    student.id.toString() === studentId && 
+                    student.password.toString() === password
+                );
 
-            // Melakukan perulangan untuk setiap siswa di dalam data
-            students.forEach(student => {
-                const listItem = document.createElement('li'); // Membuat elemen <li> baru
-                listItem.textContent = `${student.no_absen}. ${student.nama}`; // Mengisi teks, cth: "1. Budi Santoso"
-                studentListElement.appendChild(listItem); // Menambahkan <li> ke dalam <ul>
-            });
+                if (loggedInStudent) {
+                    // Jika siswa ditemukan, tampilkan dasbor
+                    showDashboard(loggedInStudent);
+                } else {
+                    // Jika tidak ditemukan, tampilkan error
+                    showLoginError("ID Siswa atau Password salah.");
+                }
+            } else {
+                showLoginError("Gagal mengambil data siswa.");
+            }
         })
         .catch(error => {
-            // Jika terjadi error saat mengambil data
-            console.error('Error fetching data:', error);
-            const studentListElement = document.getElementById('student-list');
-            studentListElement.innerHTML = '<li>Gagal memuat data. Cek koneksi dan URL API.</li>';
+            console.error('Login error:', error);
+            showLoginError("Terjadi kesalahan. Cek koneksi internet.");
         });
+}
+
+function showDashboard(student) {
+    // Sembunyikan form login
+    loginContainer.classList.add('hidden');
+    // Tampilkan dasbor
+    dashboardContainer.classList.remove('hidden');
+
+    // Sapa siswa yang berhasil login
+    dashboardWelcome.textContent = `Selamat Datang, ${student.nama}!`;
+    
+    // Nanti kita akan tambahkan fungsi untuk tombol check-in di sini
+}
+
+function showLoginError(message) {
+    loginMessage.textContent = message;
+    loginMessage.style.color = 'red';
 }
