@@ -1,14 +1,11 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykhBTWlretZ6yxoDarb_bk9mbCkBQG0e66WF1ky9yzYVD_xag/exec";
 
-// --- Fungsi Utama yang Berjalan Saat Halaman Dimuat ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Tangkap elemen dan pasang event listener di sini
     const adminLoginForm = document.getElementById('admin-login-form');
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', handleAdminLogin);
     }
 
-    // Event listener lainnya
     const showReportBtn = document.getElementById('show-report-btn');
     const showStudentsBtn = document.getElementById('show-students-btn');
     const reportBody = document.getElementById('report-body');
@@ -27,10 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editStudentForm.addEventListener('submit', handleUpdateSiswa);
     cancelStudentBtn.addEventListener('click', () => document.getElementById('edit-student-modal').classList.add('hidden'));
 });
-
-
-// --- SEMUA FUNGSI LAINNYA TETAP SAMA SEPERTI SEBELUMNYA ---
-// (handleAdminLogin, switchView, fetchReportByDate, dll.)
 
 function switchView(viewName) {
     const reportView = document.getElementById('report-view');
