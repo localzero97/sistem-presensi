@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykhBTWlretZ6yxoDarb_bk9mbCkBQG0e66WF1ky9yzYVD_xag/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxR55HFsDei68Ze7LEFcSTgnV6qUI3TXHXCOgZPaEXrhCbo62o-1CV6GNNG-rr35v5noA/exec";
 
 // Menangkap semua elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
