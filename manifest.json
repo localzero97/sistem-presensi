@@ -1,0 +1,15 @@
+{
+    "name": "Aplikasi Presensi Siswa",
+    "short_name": "Presensi",
+    "start_url": "/sistem-presensi/index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0056b3",
+    "icons": [
+        {
+            "src": "https://www.pwabuilder.com/assets/images/icons/512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
