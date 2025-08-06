@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbx46IW21b5G4fcA54CAIbM_IXCDjPzxNcLbQaNEvdJ8wFN1Hw3WOlf7Px8A3D5tGRQQ-Q/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykhBTWlretZ6yxoDarb_bk9mbCkBQG0e66WF1ky9yzYVD_xag/exec";
 
 const adminLoginContainer = document.getElementById('admin-login-container');
 const adminLoginForm = document.getElementById('admin-login-form');
@@ -7,11 +7,31 @@ const dashboardContent = document.getElementById('dashboard-content');
 const datePicker = document.getElementById('date-picker');
 const reportDateSpan = document.getElementById('report-date');
 const reportBody = document.getElementById('report-body');
+const showReportBtn = document.getElementById('show-report-btn');
+const showStudentsBtn = document.getElementById('show-students-btn');
+const reportView = document.getElementById('report-view');
+const studentsView = document.getElementById('students-view');
+const studentsBody = document.getElementById('students-body');
+const editStudentModal = document.getElementById('edit-student-modal');
+const editStudentForm = document.getElementById('edit-student-form');
+const cancelStudentBtn = document.getElementById('modal-student-cancel-btn');
 
 adminLoginForm.addEventListener('submit', function(event) {
     event.preventDefault();
     handleAdminLogin();
 });
+
+showReportBtn.addEventListener('click', () => switchView('report'));
+showStudentsBtn.addEventListener('click', () => switchView('students'));
+studentsBody.addEventListener('click', function(event) {
+    if (event.target && event.target.classList.contains('edit-student-btn')) {
+        const rowData = JSON.parse(event.target.dataset.row);
+        openEditStudentModal(rowData);
+    }
+});
+
+editStudentForm.addEventListener('submit', handleUpdateSiswa);
+cancelStudentBtn.addEventListener('click', () => editStudentModal.classList.add('hidden'));
 
 function handleAdminLogin() {
     const guruId = document.getElementById('admin-id').value;
@@ -83,4 +103,81 @@ function fetchReportByDate(tanggal) {
             console.error('Fetch error:', error);
             reportBody.innerHTML = `<tr><td colspan="4">Terjadi kesalahan saat menghubungi server.</td></tr>`;
         });
+}
+
+// --- Fungsi-fungsi ---
+
+function switchView(viewName) {
+    if (viewName === 'report') {
+        reportView.classList.remove('hidden');
+        studentsView.classList.add('hidden');
+        showReportBtn.classList.add('active');
+        showStudentsBtn.classList.remove('active');
+    } else if (viewName === 'students') {
+        studentsView.classList.remove('hidden');
+        reportView.classList.add('hidden');
+        showStudentsBtn.classList.add('active');
+        showReportBtn.classList.remove('active');
+        fetchStudentData(); // Panggil data siswa saat view diaktifkan
+    }
+}
+
+// --- FUNGSI BARU UNTUK MANAJEMEN SISWA ---
+function fetchStudentData() {
+    studentsBody.innerHTML = '<tr><td colspan="4">Memuat data siswa...</td></tr>';
+    const url = `${API_URL}?action=getAllSiswa`;
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                studentsBody.innerHTML = '';
+                result.data.forEach(siswa => {
+                    const row = document.createElement('tr');
+                    const rowData = JSON.stringify(siswa).replace(/'/g, "&apos;");
+                    row.innerHTML = `
+                        <td>${siswa.id}</td>
+                        <td>${siswa.nama}</td>
+                        <td>${siswa.password}</td>
+                        <td><button class="edit-btn edit-student-btn" data-row='${rowData}'>Edit</button></td>
+                    `;
+                    studentsBody.appendChild(row);
+                });
+            } else {
+                studentsBody.innerHTML = `<tr><td colspan="4">Gagal memuat data: ${result.message}</td></tr>`;
+            }
+        });
+}
+
+function openEditStudentModal(data) {
+    document.getElementById('modal-student-id-edit').value = data.id;
+    document.getElementById('modal-student-name-edit').value = data.nama;
+    document.getElementById('modal-student-noabsen-edit').value = data.no_absen;
+    document.getElementById('modal-student-password-edit').value = data.password;
+    editStudentModal.classList.remove('hidden');
+}
+
+function handleUpdateSiswa(event) {
+    event.preventDefault();
+    const payload = {
+        action: 'updateSiswa',
+        id: document.getElementById('modal-student-id-edit').value,
+        nama: document.getElementById('modal-student-name-edit').value,
+        no_absen: document.getElementById('modal-student-noabsen-edit').value,
+        password: document.getElementById('modal-student-password-edit').value
+    };
+
+    fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Data siswa berhasil diperbarui!');
+            editStudentModal.classList.add('hidden');
+            fetchStudentData(); // Refresh tabel siswa
+        } else {
+            alert('Gagal memperbarui: ' + result.message);
+        }
+    });
 }
