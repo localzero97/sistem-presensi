@@ -27,6 +27,7 @@
                 <button id="show-students-btn">Manajemen Siswa</button>
             </nav>
         </header>
+
         <div id="report-view">
             <div class="date-picker-container">
                 <label for="date-picker">Pilih Tanggal Laporan:</label>
@@ -48,6 +49,7 @@
                 </table>
             </main>
         </div>
+
         <div id="students-view" class="hidden">
              <main>
                 <table>
@@ -66,10 +68,49 @@
     </div>
     
     <div id="edit-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Edit Presensi</h2>
+            <p><strong>Siswa:</strong> <span id="modal-student-name"></span></p>
+            <form id="edit-form">
+                <input type="hidden" id="modal-rekap-id">
+                <label for="modal-checkin-time">Waktu Check-In (HH:mm):</label>
+                <input type="text" id="modal-checkin-time" placeholder="HH:mm">
+                <label for="modal-checkout-time">Waktu Check-Out (HH:mm):</label>
+                <input type="text" id="modal-checkout-time" placeholder="HH:mm">
+                <label for="modal-status">Status Kehadiran:</label>
+                <select id="modal-status">
+                    <option value="Hadir Tepat Waktu">Hadir Tepat Waktu</option>
+                    <option value="Terlambat">Terlambat</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alfa">Alfa</option>
+                </select>
+                <div class="modal-actions">
+                    <button type="submit">Simpan Perubahan</button>
+                    <button type="button" id="modal-cancel-btn">Batal</button>
+                </div>
+            </form>
         </div>
+    </div>
 
     <div id="edit-student-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Edit Data Siswa</h2>
+            <form id="edit-student-form">
+                <input type="hidden" id="modal-student-id-edit">
+                <label for="modal-student-name-edit">Nama Siswa:</label>
+                <input type="text" id="modal-student-name-edit" required>
+                <label for="modal-student-noabsen-edit">Nomor Absen:</label>
+                <input type="number" id="modal-student-noabsen-edit" required>
+                <label for="modal-student-password-edit">Password:</label>
+                <input type="text" id="modal-student-password-edit" required>
+                <div class="modal-actions">
+                    <button type="submit">Simpan Perubahan</button>
+                    <button type="button" id="modal-student-cancel-btn">Batal</button>
+                </div>
+            </form>
         </div>
+    </div>
 
     <script src="guru.js"></script>
 </body>
