@@ -1,90 +1,37 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykhBTWlretZ6yxoDarb_bk9mbCkBQG0e66WF1ky9yzYVD_xag/exec";
 
-// Menangkap semua elemen dari HTML
-const adminLoginContainer = document.getElementById('admin-login-container');
-const adminLoginForm = document.getElementById('admin-login-form');
-const adminLoginMessage = document.getElementById('admin-login-message');
-const dashboardContent = document.getElementById('dashboard-content');
-const datePicker = document.getElementById('date-picker');
-const reportDateSpan = document.getElementById('report-date');
-const reportBody = document.getElementById('report-body');
-const editModal = document.getElementById('edit-modal');
-const editForm = document.getElementById('edit-form');
-const cancelBtn = document.getElementById('modal-cancel-btn');
-const showReportBtn = document.getElementById('show-report-btn');
-const showStudentsBtn = document.getElementById('show-students-btn');
-const reportView = document.getElementById('report-view');
-const studentsView = document.getElementById('students-view');
-const studentsBody = document.getElementById('students-body');
-const editStudentModal = document.getElementById('edit-student-modal');
-const editStudentForm = document.getElementById('edit-student-form');
-const cancelStudentBtn = document.getElementById('modal-student-cancel-btn');
+// --- Fungsi Utama yang Berjalan Saat Halaman Dimuat ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Tangkap semua elemen di sini agar pasti sudah ada
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const reportBody = document.getElementById('report-body');
+    const editForm = document.getElementById('edit-form');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+    const showReportBtn = document.getElementById('show-report-btn');
+    const showStudentsBtn = document.getElementById('show-students-btn');
+    const studentsBody = document.getElementById('students-body');
+    const editStudentForm = document.getElementById('edit-student-form');
+    const cancelStudentBtn = document.getElementById('modal-student-cancel-btn');
 
-// --- Event Listeners ---
-adminLoginForm.addEventListener('submit', handleAdminLogin);
-showReportBtn.addEventListener('click', () => switchView('report'));
-showStudentsBtn.addEventListener('click', () => switchView('students'));
-
-reportBody.addEventListener('click', function(event) {
-    if (event.target && event.target.classList.contains('edit-btn')) {
-        const rowData = JSON.parse(event.target.dataset.row.replace(/&apos;/g, "'"));
-        openEditModal(rowData);
-    }
-});
-editForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    handleUpdatePresensi();
-});
-cancelBtn.addEventListener('click', () => {
-    editModal.classList.add('hidden');
+    // Pasang semua event listener
+    adminLoginForm.addEventListener('submit', handleAdminLogin);
+    showReportBtn.addEventListener('click', () => switchView('report'));
+    showStudentsBtn.addEventListener('click', () => switchView('students'));
+    reportBody.addEventListener('click', handleReportTableClick);
+    studentsBody.addEventListener('click', handleStudentsTableClick);
+    editForm.addEventListener('submit', handleUpdatePresensi);
+    cancelBtn.addEventListener('click', () => document.getElementById('edit-modal').classList.add('hidden'));
+    editStudentForm.addEventListener('submit', handleUpdateSiswa);
+    cancelStudentBtn.addEventListener('click', () => document.getElementById('edit-student-modal').classList.add('hidden'));
 });
 
-studentsBody.addEventListener('click', function(event) {
-    if (event.target && event.target.classList.contains('edit-student-btn')) {
-        const rowData = JSON.parse(event.target.dataset.row.replace(/&apos;/g, "'"));
-        openEditStudentModal(rowData);
-    }
-});
-editStudentForm.addEventListener('submit', handleUpdateSiswa);
-cancelStudentBtn.addEventListener('click', () => editStudentModal.classList.add('hidden'));
-
-// --- Fungsi-fungsi ---
-function handleAdminLogin(event) {
-    event.preventDefault();
-    const guruId = document.getElementById('admin-id').value;
-    const passwordInput = document.getElementById('admin-password').value;
-    adminLoginMessage.textContent = "Memvalidasi...";
-    adminLoginMessage.style.color = 'gray';
-    const url = `${API_URL}?action=loginGuru&guruId=${guruId}&password=${passwordInput}`;
-    fetch(url)
-        .then(response => response.json())
-        .then(result => {
-            if (result.status === 'success') {
-                adminLoginContainer.classList.add('hidden');
-                dashboardContent.classList.remove('hidden');
-                document.getElementById('guru-name').textContent = result.data.nama;
-                initializeDashboard();
-            } else {
-                adminLoginMessage.textContent = result.message;
-                adminLoginMessage.style.color = 'red';
-            }
-        }).catch(error => {
-            adminLoginMessage.textContent = "Terjadi kesalahan koneksi.";
-            adminLoginMessage.style.color = 'red';
-        });
-}
-
-function initializeDashboard() {
-    const today = new Date();
-    const offset = today.getTimezoneOffset();
-    const todayLocal = new Date(today.getTime() - (offset * 60 * 1000));
-    const formattedDateForInput = todayLocal.toISOString().slice(0, 10);
-    datePicker.value = formattedDateForInput;
-    datePicker.addEventListener('change', () => fetchReportByDate(datePicker.value));
-    fetchReportByDate(formattedDateForInput);
-}
-
+// --- Fungsi untuk Navigasi ---
 function switchView(viewName) {
+    const reportView = document.getElementById('report-view');
+    const studentsView = document.getElementById('students-view');
+    const showReportBtn = document.getElementById('show-report-btn');
+    const showStudentsBtn = document.getElementById('show-students-btn');
+
     if (viewName === 'report') {
         reportView.classList.remove('hidden');
         studentsView.classList.add('hidden');
@@ -99,7 +46,126 @@ function switchView(viewName) {
     }
 }
 
+// --- Fungsi-fungsi Handler (Login, Update, dll) ---
+function handleAdminLogin(event) {
+    event.preventDefault();
+    const adminLoginContainer = document.getElementById('admin-login-container');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const adminLoginMessage = document.getElementById('admin-login-message');
+    const guruId = document.getElementById('admin-id').value;
+    const passwordInput = document.getElementById('admin-password').value;
+    
+    adminLoginMessage.textContent = "Memvalidasi...";
+    const url = `${API_URL}?action=loginGuru&guruId=${guruId}&password=${passwordInput}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                adminLoginContainer.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                document.getElementById('guru-name').textContent = result.data.nama;
+                initializeDashboard();
+            } else {
+                adminLoginMessage.textContent = result.message;
+            }
+        }).catch(error => {
+            adminLoginMessage.textContent = "Terjadi kesalahan koneksi.";
+        });
+}
+
+function initializeDashboard() {
+    const datePicker = document.getElementById('date-picker');
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const todayLocal = new Date(today.getTime() - (offset * 60 * 1000));
+    const formattedDateForInput = todayLocal.toISOString().slice(0, 10);
+    datePicker.value = formattedDateForInput;
+    datePicker.addEventListener('change', () => fetchReportByDate(datePicker.value));
+    fetchReportByDate(formattedDateForInput);
+}
+
+function handleUpdatePresensi(event) {
+    event.preventDefault();
+    const payload = {
+        action: 'updatePresensi',
+        idRekap: document.getElementById('modal-rekap-id').value,
+        checkInTime: document.getElementById('modal-checkin-time').value || '-',
+        checkOutTime: document.getElementById('modal-checkout-time').value || '-',
+        status: document.getElementById('modal-status').value
+    };
+    fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Data berhasil diperbarui!');
+            document.getElementById('edit-modal').classList.add('hidden');
+            fetchReportByDate(document.getElementById('date-picker').value);
+        } else {
+            alert('Gagal memperbarui data: ' + result.message);
+        }
+    }).catch(error => alert('Terjadi kesalahan koneksi.'));
+}
+
+function handleUpdateSiswa(event) {
+    event.preventDefault();
+    const payload = {
+        action: 'updateSiswa',
+        id: document.getElementById('modal-student-id-edit').value,
+        nama: document.getElementById('modal-student-name-edit').value,
+        no_absen: document.getElementById('modal-student-noabsen-edit').value,
+        password: document.getElementById('modal-student-password-edit').value
+    };
+    fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Data siswa berhasil diperbarui!');
+            document.getElementById('edit-student-modal').classList.add('hidden');
+            fetchStudentData();
+        } else {
+            alert('Gagal memperbarui: ' + result.message);
+        }
+    });
+}
+
+// --- Fungsi untuk Event Delegation ---
+function handleReportTableClick(event) {
+    if (event.target && event.target.classList.contains('edit-btn')) {
+        const rowData = JSON.parse(event.target.dataset.row.replace(/&apos;/g, "'"));
+        openEditModal(rowData);
+    }
+}
+
+function handleStudentsTableClick(event) {
+    if (event.target && event.target.classList.contains('edit-student-btn')) {
+        const rowData = JSON.parse(event.target.dataset.row.replace(/&apos;/g, "'"));
+        openEditStudentModal(rowData);
+    }
+}
+
+// --- Fungsi untuk membuka Modal ---
+function openEditModal(data) {
+    document.getElementById('modal-student-name').textContent = data.nama;
+    document.getElementById('modal-rekap-id').value = data.idRekap;
+    document.getElementById('modal-checkin-time').value = data.checkInTime === '-' ? '' : data.checkInTime;
+    document.getElementById('modal-checkout-time').value = data.checkOutTime === '-' ? '' : data.checkOutTime;
+    document.getElementById('modal-status').value = data.status;
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function openEditStudentModal(data) {
+    document.getElementById('modal-student-id-edit').value = data.id;
+    document.getElementById('modal-student-name-edit').value = data.nama;
+    document.getElementById('modal-student-noabsen-edit').value = data.no_absen;
+    document.getElementById('modal-student-password-edit').value = data.password;
+    document.getElementById('edit-student-modal').classList.remove('hidden');
+}
+
+// --- Fungsi untuk mengambil data dari server (Fetch) ---
 function fetchReportByDate(tanggal) {
+    const reportBody = document.getElementById('report-body');
+    const reportDateSpan = document.getElementById('report-date');
     const dateObj = new Date(tanggal.replace(/-/g, '/'));
     reportDateSpan.textContent = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const url = `${API_URL}?action=getLaporanHarian&tanggal=${tanggal}`;
@@ -137,42 +203,8 @@ function fetchReportByDate(tanggal) {
         });
 }
 
-function openEditModal(data) {
-    document.getElementById('modal-student-name').textContent = data.nama;
-    document.getElementById('modal-rekap-id').value = data.idRekap;
-    document.getElementById('modal-checkin-time').value = data.checkInTime === '-' ? '' : data.checkInTime;
-    document.getElementById('modal-checkout-time').value = data.checkOutTime === '-' ? '' : data.checkOutTime;
-    document.getElementById('modal-status').value = data.status;
-    editModal.classList.remove('hidden');
-}
-
-function handleUpdatePresensi() {
-    const payload = {
-        action: 'updatePresensi',
-        idRekap: document.getElementById('modal-rekap-id').value,
-        checkInTime: document.getElementById('modal-checkin-time').value || '-',
-        checkOutTime: document.getElementById('modal-checkout-time').value || '-',
-        status: document.getElementById('modal-status').value
-    };
-    fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.status === 'success') {
-            alert('Data berhasil diperbarui!');
-            editModal.classList.add('hidden');
-            fetchReportByDate(datePicker.value);
-        } else {
-            alert('Gagal memperbarui data: ' + result.message);
-        }
-    }).catch(error => {
-        alert('Terjadi kesalahan koneksi saat memperbarui data.');
-    });
-}
-
 function fetchStudentData() {
+    const studentsBody = document.getElementById('students-body');
     studentsBody.innerHTML = '<tr><td colspan="4">Memuat data siswa...</td></tr>';
     const url = `${API_URL}?action=getAllSiswa`;
     fetch(url)
@@ -195,38 +227,4 @@ function fetchStudentData() {
                 studentsBody.innerHTML = `<tr><td colspan="4">Gagal memuat data: ${result.message}</td></tr>`;
             }
         });
-}
-
-function openEditStudentModal(data) {
-    document.getElementById('modal-student-id-edit').value = data.id;
-    document.getElementById('modal-student-name-edit').value = data.nama;
-    document.getElementById('modal-student-noabsen-edit').value = data.no_absen;
-    document.getElementById('modal-student-password-edit').value = data.password;
-    editStudentModal.classList.remove('hidden');
-}
-
-function handleUpdateSiswa(event) {
-    event.preventDefault();
-    const payload = {
-        action: 'updateSiswa',
-        id: document.getElementById('modal-student-id-edit').value,
-        nama: document.getElementById('modal-student-name-edit').value,
-        no_absen: document.getElementById('modal-student-noabsen-edit').value,
-        password: document.getElementById('modal-student-password-edit').value
-    };
-
-    fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.status === 'success') {
-            alert('Data siswa berhasil diperbarui!');
-            editStudentModal.classList.add('hidden');
-            fetchStudentData();
-        } else {
-            alert('Gagal memperbarui: ' + result.message);
-        }
-    });
 }
