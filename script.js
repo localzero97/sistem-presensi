@@ -64,6 +64,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// --- FUNGSI BARU UNTUK MEMUAT DATA LOGIN YANG TERSIMPAN ---
+function loadSavedCredentials() {
+    const savedId = localStorage.getItem('savedStudentId');
+    const savedPassword = localStorage.getItem('savedPassword');
+
+    if (savedId && savedPassword) {
+        document.getElementById('student-id').value = savedId;
+        document.getElementById('password').value = savedPassword;
+        console.log("Data login berhasil dimuat dari penyimpanan.");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loginForm.addEventListener('submit', handleLogin);
+
+    togglePasswordSiswa.addEventListener('click', function () {
+        const type = passwordSiswa.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordSiswa.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+// --- PANGGIL FUNGSI BARU SAAT APLIKASI DIBUKA ---
+    loadSavedCredentials();
+});
+
 // FUNGSI BARU UNTUK MEMBUAT ATAU MENGAMBIL ID PERANGKAT
 function getOrCreateDeviceId() {
     let deviceId = localStorage.getItem('presensiDeviceId');
@@ -75,22 +100,21 @@ function getOrCreateDeviceId() {
     return deviceId;
 }
 
-function handleLogin() {
-    const studentId = document.getElementById('student-id').value;
-    const password = document.getElementById('password').value;
+function handleLogin(event) {
+    event.preventDefault();
+    const studentIdInput = document.getElementById('student-id');
+    const passwordInput = document.getElementById('password');
     const deviceId = getOrCreateDeviceId();
 
     loginMessage.textContent = 'Mencoba login...';
-    loginMessage.style.color = 'gray';
 
     const payload = {
         action: 'loginSiswa',
-        studentId: studentId,
-        password: password,
+        studentId: studentIdInput.value,
+        password: passwordInput.value,
         deviceId: deviceId
     };
 
-    // Menggunakan metode POST untuk mengirim data login
     fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -98,6 +122,11 @@ function handleLogin() {
     .then(response => response.json())
     .then(result => {
         if (result.status === 'success') {
+            // --- BAGIAN BARU: SIMPAN DATA SETELAH LOGIN SUKSES ---
+            localStorage.setItem('savedStudentId', studentIdInput.value);
+            localStorage.setItem('savedPassword', passwordInput.value);
+            console.log("Login sukses, data disimpan ke penyimpanan.");
+            
             currentUser = result.data;
             showDashboard();
         } else {
