@@ -79,6 +79,31 @@ tr:nth-child(even) { background-color: #f9f9f9; }
     padding: 0 10px;
 }
 
+/* --- Style untuk Tombol Tampilkan Password --- */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    /* Atur agar lebar input sesuai dengan wadah form */
+    max-width: calc(100% - 22px);
+    margin: 0 auto 15px auto;
+}
+
+.password-wrapper input {
+    /* Buat input mengisi seluruh wadah wrapper */
+    width: 100%;
+    padding-right: 40px; /* Beri ruang di kanan untuk ikon mata */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none; /* Mencegah teks ikon terseleksi */
+    color: #888; /* Warna ikon agar tidak terlalu mencolok */
+}
+
 footer {
     position: fixed; /* Diubah agar selalu di bawah */
     bottom: 0;
