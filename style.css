@@ -52,3 +52,16 @@ th { background-color: #f2f2f2; font-weight: bold; color: #333; }
 tr:nth-child(even) { background-color: #f9f9f9; }
 .status-terlambat { color: #d9534f; font-weight: bold; }
 .status-hadir { color: #5cb85c; }
+.school-logo {
+    max-width: 100px; /* Atur ukuran logo */
+    margin-bottom: 15px;
+}
+
+footer {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
