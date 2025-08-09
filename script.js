@@ -4,6 +4,32 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykh
 // Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
 
+// FUNGSI UTAMA UNTUK MENGIRIM DATA KEHADIRAN (CHECK-IN & CHECK-OUT)
+function sendPresenceData(payload) {
+    fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(result => {
+        // --- PERUBAHAN DI SINI ---
+        if (result.status === 'success') {
+            // Jika ada info urutan, tampilkan pesan semangat. Jika tidak, tampilkan pesan biasa.
+            presenceMessage.textContent = result.rankInfo || result.message;
+            presenceMessage.style.color = 'green';
+        } else {
+            presenceMessage.textContent = result.message;
+            presenceMessage.style.color = 'red';
+        }
+        checkInitialPresenceStatus(); // Refresh status tombol
+    }).catch(error => {
+        console.error('Presence error:', error);
+        presenceMessage.textContent = "Error: Tidak bisa menghubungi server.";
+        presenceMessage.style.color = 'red';
+        checkInitialPresenceStatus();
+    });
+}
+
 // Menangkap elemen-elemen dari HTML
 const loginContainer = document.getElementById('login-container');
 const dashboardContainer = document.getElementById('dashboard-container');
