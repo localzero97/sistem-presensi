@@ -55,12 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordSiswa = document.getElementById('password');
 
     togglePasswordSiswa.addEventListener('click', function () {
-        // Ganti tipe input
         const type = passwordSiswa.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordSiswa.setAttribute('type', type);
         
-        // Ganti ikon mata (opsional)
-        this.textContent = type === 'password' ? '👁️' : '🙈';
+        // Ganti class ikon
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
     });
 });
 
