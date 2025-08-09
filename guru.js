@@ -1,5 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzrwwMQrZry-Ce9jPgo_ykhBTWlretZ6yxoDarb_bk9mbCkBQG0e66WF1ky9yzYVD_xag/exec";
-
+const API_URL = "https://script.google.com/macros/s/AKfycbwYM6LBwVGAMH2Oy15VY5ponsRnj6GKAUS_n2QFq6e-H92NoZTjaZHD02l0K_GSw2-Czw/exec
 const adminLoginContainer = document.getElementById('admin-login-container');
 const adminLoginForm = document.getElementById('admin-login-form');
 const adminLoginMessage = document.getElementById('admin-login-message');
