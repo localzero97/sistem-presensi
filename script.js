@@ -47,6 +47,23 @@ loginForm.addEventListener('submit', function(event) {
     handleLogin();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (Event listener untuk loginForm tidak berubah)
+    
+    // LOGIKA BARU UNTUK TOMBOL TAMPILKAN PASSWORD SISWA
+    const togglePasswordSiswa = document.getElementById('toggle-password-siswa');
+    const passwordSiswa = document.getElementById('password');
+
+    togglePasswordSiswa.addEventListener('click', function () {
+        // Ganti tipe input
+        const type = passwordSiswa.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordSiswa.setAttribute('type', type);
+        
+        // Ganti ikon mata (opsional)
+        this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+});
+
 // FUNGSI BARU UNTUK MEMBUAT ATAU MENGAMBIL ID PERANGKAT
 function getOrCreateDeviceId() {
     let deviceId = localStorage.getItem('presensiDeviceId');
