@@ -17,7 +17,10 @@
         <form id="login-form">
             <h2>Silakan Login</h2>
             <input type="number" id="student-id" placeholder="Masukkan ID Siswa (NIS)" required>
-            <input type="password" id="password" placeholder="Masukkan Password" required>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Masukkan Password" required>
+                <i class="toggle-password" id="toggle-password-siswa">👁️</i>
+            </div>
             <button type="submit">Login</button>
         </form>
         <p id="login-message"></p>
