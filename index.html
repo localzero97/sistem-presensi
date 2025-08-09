@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Aplikasi Presensi</title>
+    <title>Login - Presensi SMKN 3 SOPPENG</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
     <div id="login-container">
-        <h1>Silakan Login</h1>
+        <img src="https://raw.githubusercontent.com/localzero97/sistem-presensi/main/Logo%20SMKN%203%20SOPPENG.png" alt="Logo SMKN 3 Soppeng" class="school-logo">
+
+        <h1>Sistem Presensi Kelas<br>SMKN 3 SOPPENG</h1>
+        
         <form id="login-form">
+            <h2>Silakan Login</h2>
             <input type="number" id="student-id" placeholder="Masukkan ID Siswa (NIS)" required>
             <input type="password" id="password" placeholder="Masukkan Password" required>
             <button type="submit">Login</button>
@@ -31,6 +35,10 @@
             <p id="presence-message"></p>
         </main>
     </div>
+
+    <footer>
+        Copyright &copy; Fadlan Akbar 2025
+    </footer>
 
     <script src="script.js"></script>
 </body>
