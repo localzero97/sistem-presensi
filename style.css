@@ -22,12 +22,13 @@ body {
 header, main { padding: 0; margin: 0; }
 h1, h2 { color: #0056b3; text-align: center; }
 input[type="text"], input[type="number"], input[type="password"], input[type="date"] {
-    width: calc(100% - 22px);
+    width: 100%; /* Dibuat 100% agar mudah diatur */
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    box-sizing: border-box; /* Properti penting agar padding tidak merusak lebar */
 }
 button {
     width: 100%;
@@ -66,52 +67,51 @@ tr:nth-child(even) { background-color: #f9f9f9; }
 .view-switcher button { width: auto; background-color: transparent; color: #007bff; border: 2px solid transparent; padding: 10px 20px; margin: 0 5px; font-size: 16px; }
 .view-switcher button.active { border-bottom: 2px solid #007bff; font-weight: bold; }
 
-/* --- Style untuk Logo & Footer (SUDAH DIPERBARUI) --- */
+/* --- Style untuk Logo & Footer --- */
 .school-logo {
-    max-width: 80px; /* Ukuran logo dikecilkan */
+    max-width: 80px;
     margin-bottom: 15px;
 }
-
 .beta-notice {
     font-size: 12px;
     color: #6c757d;
     margin-top: 20px;
     padding: 0 10px;
 }
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    background-color: #f4f7f6;
+}
 
-/* --- Style untuk Tombol Tampilkan Password --- */
+/* --- Style untuk Tombol Tampilkan Password (SUDAH DIPERBAIKI) --- */
 .password-wrapper {
     position: relative;
-    width: 100%;
-    /* Atur agar lebar input sesuai dengan wadah form */
-    max-width: calc(100% - 22px);
-    margin: 0 auto 15px auto;
+    width: 100%; /* Dibuat 100% agar sejajar */
+    margin-bottom: 15px;
 }
-
 .password-wrapper input {
-    /* Buat input mengisi seluruh wadah wrapper */
+    /* Ukuran input disamakan dengan yang lain */
     width: 100%;
+    padding: 10px;
     padding-right: 40px; /* Beri ruang di kanan untuk ikon mata */
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
-
 .toggle-password {
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    user-select: none; /* Mencegah teks ikon terseleksi */
-    color: #888; /* Warna ikon agar tidak terlalu mencolok */
-}
-
-footer {
-    position: fixed; /* Diubah agar selalu di bawah */
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px 0;
-    text-align: center; /* Teks di tengah */
+    user-select: none;
     color: #888;
-    font-size: 14px;
-    background-color: #f4f7f6; /* Warna latar agar tidak transparan */
 }
