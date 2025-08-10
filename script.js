@@ -1,4 +1,3 @@
-// URL API Anda
 const API_URL = "https://script.google.com/macros/s/AKfycbwYM6LBwVGAMH2Oy15VY5ponsRnj6GKAUS_n2QFq6e-H92NoZTjaZHD02l0K_GSw2-Czw/exec";
 
 // Variabel global untuk menyimpan data pengguna yang login
@@ -18,7 +17,6 @@ const checkOutBtn = document.getElementById('check-out-btn');
 const presenceMessage = document.getElementById('presence-message');
 
 // --- Event Listener Utama ---
-// Semua event listener dipasang setelah halaman selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', handleLogin);
 
@@ -34,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSavedCredentials();
 });
-
 
 // --- Fungsi-fungsi Utama ---
 
@@ -144,6 +141,7 @@ function sendPresenceData(payload) {
     })
     .then(response => response.json())
     .then(result => {
+        // PERUBAHAN UTAMA: Cek apakah ada 'rankInfo', jika ada, tampilkan itu.
         presenceMessage.textContent = result.rankInfo || result.message;
         presenceMessage.style.color = (result.status === 'success') ? 'green' : 'red';
         checkInitialPresenceStatus();
@@ -172,6 +170,9 @@ function checkInitialPresenceStatus() {
 }
 
 function updateButtonState(presenceData) {
+    // Tampilkan waktu saat ini di dasbor
+    document.getElementById('current-time').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', weekday: 'long', day: 'numeric', month: 'long' });
+
     presenceMessage.textContent = '';
     if (presenceData) {
         if (presenceData.checkOutTime) {
