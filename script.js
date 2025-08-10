@@ -1,9 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwYM6LBwVGAMH2Oy15VY5ponsRnj6GKAUS_n2QFq6e-H92NoZTjaZHD02l0K_GSw2-Czw/exec";
 
-// Variabel global untuk menyimpan data pengguna yang login
 let currentUser = null;
 
-// Menangkap semua elemen dari HTML di satu tempat
 const loginContainer = document.getElementById('login-container');
 const dashboardContainer = document.getElementById('dashboard-container');
 const loginForm = document.getElementById('login-form');
@@ -16,24 +14,18 @@ const checkInBtn = document.getElementById('check-in-btn');
 const checkOutBtn = document.getElementById('check-out-btn');
 const presenceMessage = document.getElementById('presence-message');
 
-// --- Event Listener Utama ---
 document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', handleLogin);
-
     togglePasswordSiswa.addEventListener('click', function () {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
-
     checkInBtn.addEventListener('click', () => handlePresence('checkin'));
     checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
-
     loadSavedCredentials();
 });
-
-// --- Fungsi-fungsi Utama ---
 
 function loadSavedCredentials() {
     const savedId = localStorage.getItem('savedStudentId');
@@ -57,14 +49,12 @@ function handleLogin(event) {
     event.preventDefault();
     loginMessage.textContent = 'Mencoba login...';
     loginMessage.style.color = 'gray';
-
     const payload = {
         action: 'loginSiswa',
         studentId: studentIdInput.value,
         password: passwordInput.value,
         deviceId: getOrCreateDeviceId()
     };
-
     fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -96,13 +86,11 @@ function showDashboard() {
 function handlePresence(action) {
     checkInBtn.disabled = true;
     checkOutBtn.disabled = true;
-
     if (action === 'checkin') {
         presenceMessage.textContent = 'Mendapatkan lokasi Anda...';
         presenceMessage.style.color = 'gray';
-        
         navigator.geolocation.getCurrentPosition(
-            position => { // Jika sukses
+            position => {
                 const payload = {
                     action: 'checkin',
                     studentId: currentUser.id,
@@ -111,16 +99,15 @@ function handlePresence(action) {
                 };
                 sendPresenceData(payload);
             },
-            error => { // Jika gagal
+            error => {
                 let errorMessage = "Gagal mendapatkan lokasi: ";
                 if(error.code === 1) errorMessage += "Anda menolak izin lokasi.";
                 else if(error.code === 2) errorMessage += "Informasi lokasi tidak tersedia.";
                 else if(error.code === 3) errorMessage += "Waktu permintaan lokasi habis.";
                 else errorMessage += "Terjadi kesalahan tidak dikenal.";
-                
                 presenceMessage.textContent = errorMessage;
                 presenceMessage.style.color = 'red';
-                checkInitialPresenceStatus(); // Kembalikan state tombol
+                checkInitialPresenceStatus();
             }
         );
     } else if (action === 'checkout') {
@@ -141,7 +128,8 @@ function sendPresenceData(payload) {
     })
     .then(response => response.json())
     .then(result => {
-        // PERUBAHAN UTAMA: Cek apakah ada 'rankInfo', jika ada, tampilkan itu.
+        // **INI BAGIAN PENTINGNYA**
+        // Sekarang ia akan menampilkan `rankInfo` jika ada
         presenceMessage.textContent = result.rankInfo || result.message;
         presenceMessage.style.color = (result.status === 'success') ? 'green' : 'red';
         checkInitialPresenceStatus();
@@ -156,7 +144,6 @@ function sendPresenceData(payload) {
 function checkInitialPresenceStatus() {
     presenceMessage.textContent = 'Mengecek status kehadiran...';
     presenceMessage.style.color = 'gray';
-
     fetch(`${API_URL}?action=getTodaysStatus&id=${currentUser.id}`)
         .then(response => response.json())
         .then(result => {
@@ -170,10 +157,10 @@ function checkInitialPresenceStatus() {
 }
 
 function updateButtonState(presenceData) {
-    // Tampilkan waktu saat ini di dasbor
     document.getElementById('current-time').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', weekday: 'long', day: 'numeric', month: 'long' });
-
-    presenceMessage.textContent = '';
+    if (!presenceMessage.textContent.includes("berhasil")) {
+        presenceMessage.textContent = '';
+    }
     if (presenceData) {
         if (presenceData.checkOutTime) {
             checkInBtn.disabled = true;
@@ -182,7 +169,9 @@ function updateButtonState(presenceData) {
         } else {
             checkInBtn.disabled = true;
             checkOutBtn.disabled = false;
-            presenceMessage.textContent = `Anda sudah check-in pada pukul ${presenceData.checkInTime}. Silakan check-out jika sudah waktunya.`;
+            if (!presenceMessage.textContent.includes("berhasil")) {
+                 presenceMessage.textContent = `Anda sudah check-in pada pukul ${presenceData.checkInTime}. Silakan check-out jika sudah waktunya.`;
+            }
         }
     } else {
         checkInBtn.disabled = false;
