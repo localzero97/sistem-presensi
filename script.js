@@ -144,11 +144,12 @@ function sendPresenceData(payload) {
 function checkInitialPresenceStatus() {
     presenceMessage.textContent = 'Mengecek status kehadiran...';
     presenceMessage.style.color = 'gray';
+
     fetch(`${API_URL}?action=getTodaysStatus&id=${currentUser.id}`)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                updateButtonState(result.data);
+                updateButtonState(result.data); // result.data sekarang berisi pesan notifikasi
             } else {
                 presenceMessage.textContent = 'Gagal mengecek status kehadiran.';
                 presenceMessage.style.color = 'red';
@@ -158,22 +159,28 @@ function checkInitialPresenceStatus() {
 
 function updateButtonState(presenceData) {
     document.getElementById('current-time').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', weekday: 'long', day: 'numeric', month: 'long' });
-    if (!presenceMessage.textContent.includes("berhasil")) {
-        presenceMessage.textContent = '';
-    }
-    if (presenceData) {
-        if (presenceData.checkOutTime) {
+    
+    // Kosongkan pesan sebelum menampilkan yang baru
+    presenceMessage.textContent = '';
+
+    if (presenceData) { // Jika ada data presensi hari ini
+        if (presenceData.checkOutTime) { // Jika sudah check-out
             checkInBtn.disabled = true;
             checkOutBtn.disabled = true;
             presenceMessage.textContent = `Presensi hari ini selesai. Check-in pukul ${presenceData.checkInTime}, Check-out pukul ${presenceData.checkOutTime}.`;
-        } else {
+        } else { // Jika sudah check-in tapi belum check-out
             checkInBtn.disabled = true;
             checkOutBtn.disabled = false;
-            if (!presenceMessage.textContent.includes("berhasil")) {
+            
+            // PERUBAHAN: Prioritaskan menampilkan pesan notifikasi dari sheet
+            if (presenceData.notificationMessage) {
+                presenceMessage.textContent = presenceData.notificationMessage;
+                presenceMessage.style.color = 'green';
+            } else {
                  presenceMessage.textContent = `Anda sudah check-in pada pukul ${presenceData.checkInTime}. Silakan check-out jika sudah waktunya.`;
             }
         }
-    } else {
+    } else { // Jika belum ada data sama sekali (belum check-in)
         checkInBtn.disabled = false;
         checkOutBtn.disabled = true;
         presenceMessage.textContent = 'Anda belum melakukan check-in hari ini.';
