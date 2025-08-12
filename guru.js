@@ -1,6 +1,5 @@
 // GANTI DENGAN URL API BARU ANDA SETELAH DEPLOY CODE.GS TERAKHIR
-const API_URL = "https://script.google.com/macros/s/AKfycbxR55HFsDei68Ze7LEFcSTgnV6qUI3TXHXCOgZPaEXrhCbo62o-1CV6GNNG-rr35v5noA/exec";
-
+const API_URL = "https://script.google.com/macros/s/AKfycbwZsDJenqqweFtEp3B_2n-r85hFD6PBOegyAPlAj6fudJZro1bGmCxUfW6d1S8j6xbA4g/exec";
 // Menangkap semua elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
 const adminLoginForm = document.getElementById('admin-login-form');
