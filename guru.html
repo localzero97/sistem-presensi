@@ -46,7 +46,6 @@
                             <th>Check-In</th>
                             <th>Check-Out</th>
                             <th>Status</th>
-                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="report-body"></tbody>
@@ -69,10 +68,26 @@
             </main>
         </div>
     </div>
-    <div id="edit-modal" class="modal-overlay hidden">
-        </div>
+    
     <div id="edit-student-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Edit Data Siswa</h2>
+            <form id="edit-student-form">
+                <input type="hidden" id="modal-student-id-edit">
+                <label for="modal-student-name-edit">Nama Siswa:</label>
+                <input type="text" id="modal-student-name-edit" required>
+                <label for="modal-student-noabsen-edit">Nomor Absen:</label>
+                <input type="number" id="modal-student-noabsen-edit" required>
+                <label for="modal-student-password-edit">Password:</label>
+                <input type="text" id="modal-student-password-edit" required>
+                <div class="modal-actions">
+                    <button type="submit">Simpan Perubahan</button>
+                    <button type="button" id="modal-student-cancel-btn">Batal</button>
+                </div>
+            </form>
         </div>
+    </div>
+
     <script src="guru.js"></script>
 </body>
 </html>
