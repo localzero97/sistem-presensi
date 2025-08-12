@@ -1,111 +1,181 @@
 // URL API Anda
 const API_URL = "https://script.google.com/macros/s/AKfycbwZsDJenqqweFtEp3B_2n-r85hFD6PBOegyAPlAj6fudJZro1bGmCxUfW6d1S8j6xbA4g/exec";
 
-// Variabel global untuk menyimpan data pengguna yang login
-let currentUser = null;
+// Menangkap semua elemen dari HTML
+const adminLoginContainer = document.getElementById('admin-login-container');
+const adminLoginForm = document.getElementById('admin-login-form');
+const adminLoginMessage = document.getElementById('admin-login-message');
+const dashboardContent = document.getElementById('dashboard-content');
+const datePicker = document.getElementById('date-picker');
+const reportDateSpan = document.getElementById('report-date');
+const reportBody = document.getElementById('report-body');
+const filterInput = document.getElementById('filter-input');
+const togglePasswordGuru = document.getElementById('toggle-password-guru');
+const passwordGuru = document.getElementById('admin-password');
+const reportTableHeader = document.getElementById('report-table-header');
 
-// Menangkap semua elemen dari HTML di satu tempat
-const loginContainer = document.getElementById('login-container');
-const dashboardContainer = document.getElementById('dashboard-container');
-const loginForm = document.getElementById('login-form');
-const studentIdInput = document.getElementById('student-id');
-const passwordInput = document.getElementById('password');
-const togglePasswordSiswa = document.getElementById('toggle-password-siswa');
-const loginMessage = document.getElementById('login-message');
-const dashboardWelcome = document.getElementById('dashboard-welcome');
-const checkInBtn = document.getElementById('check-in-btn');
-const checkOutBtn = document.getElementById('check-out-btn');
-const presenceMessage = document.getElementById('presence-message');
+// Variabel global untuk menyimpan status sorting
+let sortColumn = null;
+let sortDirection = 'asc';
 
-// --- Event Listener Utama ---
-// Semua event listener dipasang setelah halaman selesai dimuat
+// --- Event Listeners Utama ---
 document.addEventListener('DOMContentLoaded', () => {
-    loginForm.addEventListener('submit', handleLogin);
-
-    togglePasswordSiswa.addEventListener('click', function () {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
+    adminLoginForm.addEventListener('submit', handleAdminLogin);
+    filterInput.addEventListener('keyup', filterTable);
+    togglePasswordGuru.addEventListener('click', function () {
+        const type = passwordGuru.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordGuru.setAttribute('type', type);
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
-
-    checkInBtn.addEventListener('click', () => handlePresence('checkin'));
-    checkOutBtn.addEventListener('click', () => handlePresence('checkout'));
-
-    loadSavedCredentials();
+    reportTableHeader.addEventListener('click', handleSortTable);
 });
 
 
-// --- Fungsi-fungsi Utama ---
-
-function loadSavedCredentials() {
-    const savedId = localStorage.getItem('savedStudentId');
-    const savedPassword = localStorage.getItem('savedPassword');
-    if (savedId && savedPassword) {
-        studentIdInput.value = savedId;
-        passwordInput.value = savedPassword;
-    }
-}
-
-function getOrCreateDeviceId() {
-    let deviceId = localStorage.getItem('presensiDeviceId');
-    if (!deviceId) {
-        deviceId = 'device-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('presensiDeviceId', deviceId);
-    }
-    return deviceId;
-}
-
-function handleLogin(event) {
+// --- Fungsi-fungsi ---
+function handleAdminLogin(event) {
     event.preventDefault();
-    loginMessage.textContent = 'Mencoba login...';
-    loginMessage.style.color = 'gray';
+    adminLoginMessage.textContent = "Memvalidasi...";
+    adminLoginMessage.style.color = 'gray';
+    const guruId = document.getElementById('admin-id').value;
+    const passwordInput = document.getElementById('admin-password').value;
+    const url = `${API_URL}?action=loginGuru&guruId=${guruId}&password=${passwordInput}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                adminLoginContainer.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                document.getElementById('guru-name').textContent = result.data.nama;
+                initializeDashboard();
+            } else {
+                adminLoginMessage.textContent = result.message;
+                adminLoginMessage.style.color = 'red';
+            }
+        }).catch(error => {
+            console.error('Admin login error:', error);
+            adminLoginMessage.textContent = "Terjadi kesalahan koneksi.";
+            adminLoginMessage.style.color = 'red';
+        });
+}
 
-    const payload = {
-        action: 'loginSiswa',
-        studentId: studentIdInput.value,
-        password: passwordInput.value,
-        deviceId: getOrCreateDeviceId()
-    };
+function initializeDashboard() {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const todayLocal = new Date(today.getTime() - (offset * 60 * 1000));
+    const formattedDateForInput = todayLocal.toISOString().slice(0, 10);
+    datePicker.value = formattedDateForInput;
+    datePicker.addEventListener('change', () => fetchReportByDate(datePicker.value));
+    fetchReportByDate(formattedDateForInput);
+}
 
-    fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.status === 'success') {
-            localStorage.setItem('savedStudentId', studentIdInput.value);
-            localStorage.setItem('savedPassword', passwordInput.value);
-            currentUser = result.data;
-            showDashboard();
-        } else {
-            showLoginError(result.message);
+function fetchReportByDate(tanggal) {
+    const dateObj = new Date(tanggal.replace(/-/g, '/'));
+    reportDateSpan.textContent = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const url = `${API_URL}?action=getLaporanHarian&tanggal=${tanggal}`;
+    reportBody.innerHTML = '<tr><td colspan="4">Memuat data laporan...</td></tr>';
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                reportBody.innerHTML = '';
+                const reportData = result.data;
+                if (reportData.length === 0) {
+                    reportBody.innerHTML = '<tr><td colspan="4">Tidak ada data presensi pada tanggal ini.</td></tr>';
+                    return;
+                }
+                reportData.forEach(item => {
+                    const row = document.createElement('tr');
+                    let statusClass = '';
+                    if (item.status === 'Terlambat') { statusClass = 'status-terlambat'; } 
+                    else if (item.status === 'Hadir Tepat Waktu') { statusClass = 'status-hadir'; }
+                    else if (item.status === 'Absen') { statusClass = 'status-absen'; }
+                    row.innerHTML = `
+                        <td data-value="${item.nama}">${item.nama}</td>
+                        <td data-value="${item.checkInTime}">${item.checkInTime}</td>
+                        <td data-value="${item.checkOutTime}">${item.checkOutTime}</td>
+                        <td class="${statusClass}" data-value="${item.status}">${item.status}</td>
+                    `;
+                    reportBody.appendChild(row);
+                });
+            } else {
+                reportBody.innerHTML = `<tr><td colspan="4">Gagal memuat laporan: ${result.message}</td></tr>`;
+            }
+        }).catch(error => {
+            console.error('Fetch error:', error);
+            reportBody.innerHTML = `<tr><td colspan="4">Terjadi kesalahan saat menghubungi server.</td></tr>`;
+        });
+}
+
+function filterTable() {
+    const filterText = filterInput.value.toUpperCase();
+    const rows = reportBody.getElementsByTagName('tr');
+    for (const row of rows) {
+        const nameCell = row.getElementsByTagName('td')[0];
+        if (nameCell) {
+            const nameText = nameCell.textContent || nameCell.innerText;
+            if (nameText.toUpperCase().indexOf(filterText) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
         }
-    })
-    .catch(error => {
-        console.error('Login error:', error);
-        showLoginError("Terjadi kesalahan. Cek koneksi internet.");
+    }
+}
+
+// --- FUNGSI BARU UNTUK SORTING ---
+function handleSortTable(event) {
+    const targetHeader = event.target.closest('.sortable');
+    if (!targetHeader) return;
+
+    const column = targetHeader.dataset.sort;
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+
+    document.querySelectorAll('#report-table-header .sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
     });
+    targetHeader.classList.add(sortDirection);
+
+    sortDataInTable();
 }
 
-function showDashboard() {
-    loginContainer.classList.add('hidden');
-    dashboardContainer.classList.remove('hidden');
-    dashboardWelcome.textContent = `Selamat Datang, ${currentUser.nama}!`;
-    checkInitialPresenceStatus();
+function sortDataInTable() {
+    const rows = Array.from(reportBody.querySelectorAll('tr'));
+    const columnIndex = getColumnIndex(sortColumn);
+
+    const sortedRows = rows.sort((a, b) => {
+        const aCell = a.querySelector(`td:nth-child(${columnIndex})`);
+        const bCell = b.querySelector(`td:nth-child(${columnIndex})`);
+
+        const aValue = aCell.dataset.value;
+        const bValue = bCell.dataset.value;
+
+        // Aturan sorting: '-' selalu di paling bawah
+        if (aValue === '-' && bValue !== '-') return 1;
+        if (bValue === '-' && aValue !== '-') return -1;
+        if (aValue === '-' && bValue === '-') return 0;
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    reportBody.innerHTML = '';
+    sortedRows.forEach(row => reportBody.appendChild(row));
 }
 
-function handlePresence(action) {
-    checkInBtn.disabled = true;
-    checkOutBtn.disabled = true;
+function getColumnIndex(columnName) {
+    if (columnName === 'nama') return 1;
+    if (columnName === 'checkin') return 2;
+    if (columnName === 'status') return 4;
+    return 1; // Default
+}
 
-    if (action === 'checkin') {
-        presenceMessage.textContent = 'Mendapatkan lokasi Anda...';
-        presenceMessage.style.color = 'gray';
-        
-        navigator.geolocation.getCurrentPosition(
-            position => { // Jika sukses
                 const payload = {
                     action: 'checkin',
                     studentId: currentUser.id,
