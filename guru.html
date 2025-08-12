@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Guru - Aplikasi Presensi</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
     <div id="admin-login-container">
         <h1>Akses Dasbor Guru</h1>
         <form id="admin-login-form">
             <input type="text" id="admin-id" placeholder="Masukkan ID Guru (NIP)" required>
-            <input type="password" id="admin-password" placeholder="Masukkan Password Guru" required>
+            <div class="password-wrapper">
+                <input type="password" id="admin-password" placeholder="Masukkan Password Guru" required>
+                <i class="fa-solid fa-eye toggle-password" id="toggle-password-guru"></i>
+            </div>
             <button type="submit">Masuk</button>
         </form>
         <p id="admin-login-message"></p>
@@ -20,26 +24,55 @@
         <header>
             <h1>Dasbor Guru</h1>
             <p>Selamat datang, <strong id="guru-name"></strong>!</p>
+            <nav class="view-switcher">
+                <button id="show-report-btn" class="active">Laporan Presensi</button>
+                <button id="show-students-btn">Manajemen Siswa</button>
+            </nav>
+        </header>
+        <div id="report-view">
             <div class="date-picker-container">
                 <label for="date-picker">Pilih Tanggal Laporan:</label>
                 <input type="date" id="date-picker">
             </div>
+            <div class="filter-container">
+                <input type="text" id="filter-input" placeholder="Cari nama siswa...">
+            </div>
             <p>Menampilkan Laporan Presensi untuk: <span id="report-date"></span></p>
-        </header>
-        <main>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nama Siswa</th>
-                        <th>Check-In</th>
-                        <th>Check-Out</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="report-body"></tbody>
-            </table>
-        </main>
+            <main>
+                <table id="report-table">
+                    <thead>
+                        <tr>
+                            <th>Nama Siswa</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-body"></tbody>
+                </table>
+            </main>
+        </div>
+        <div id="students-view" class="hidden">
+             <main>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Siswa</th>
+                            <th>Nama</th>
+                            <th>Password</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-body"></tbody>
+                </table>
+            </main>
+        </div>
     </div>
+    <div id="edit-modal" class="modal-overlay hidden">
+        </div>
+    <div id="edit-student-modal" class="modal-overlay hidden">
+        </div>
     <script src="guru.js"></script>
 </body>
 </html>
