@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF--8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Guru - Aplikasi Presensi</title>
     <link rel="stylesheet" href="style.css">
@@ -39,11 +39,11 @@
             <main>
                 <table id="report-table">
                     <thead>
-                        <tr>
-                            <th>Nama Siswa</th>
-                            <th>Check-In</th>
+                        <tr id="report-table-header">
+                            <th class="sortable" data-sort="nama">Nama Siswa</th>
+                            <th class="sortable" data-sort="checkin">Check-In</th>
                             <th>Check-Out</th>
-                            <th>Status</th>
+                            <th class="sortable" data-sort="status">Status</th>
                         </tr>
                     </thead>
                     <tbody id="report-body"></tbody>
