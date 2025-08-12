@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Guru - Aplikasi Presensi</title>
     <link rel="stylesheet" href="style.css">
@@ -20,15 +20,13 @@
         </form>
         <p id="admin-login-message"></p>
     </div>
+
     <div id="dashboard-content" class="hidden">
         <header>
             <h1>Dasbor Guru</h1>
             <p>Selamat datang, <strong id="guru-name"></strong>!</p>
-            <nav class="view-switcher">
-                <button id="show-report-btn" class="active">Laporan Presensi</button>
-                <button id="show-students-btn">Manajemen Siswa</button>
-            </nav>
         </header>
+        
         <div id="report-view">
             <div class="date-picker-container">
                 <label for="date-picker">Pilih Tanggal Laporan:</label>
@@ -51,40 +49,6 @@
                     <tbody id="report-body"></tbody>
                 </table>
             </main>
-        </div>
-        <div id="students-view" class="hidden">
-             <main>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Siswa</th>
-                            <th>Nama</th>
-                            <th>Password</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="students-body"></tbody>
-                </table>
-            </main>
-        </div>
-    </div>
-    
-    <div id="edit-student-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2>Edit Data Siswa</h2>
-            <form id="edit-student-form">
-                <input type="hidden" id="modal-student-id-edit">
-                <label for="modal-student-name-edit">Nama Siswa:</label>
-                <input type="text" id="modal-student-name-edit" required>
-                <label for="modal-student-noabsen-edit">Nomor Absen:</label>
-                <input type="number" id="modal-student-noabsen-edit" required>
-                <label for="modal-student-password-edit">Password:</label>
-                <input type="text" id="modal-student-password-edit" required>
-                <div class="modal-actions">
-                    <button type="submit">Simpan Perubahan</button>
-                    <button type="button" id="modal-student-cancel-btn">Batal</button>
-                </div>
-            </form>
         </div>
     </div>
 
