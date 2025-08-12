@@ -194,3 +194,21 @@ function showLoginError(message) {
     loginMessage.textContent = message;
     loginMessage.style.color = 'red';
 }
+
+// --- FUNGSI BARU UNTUK FILTER TABEL ---
+function filterTable() {
+    const filterText = filterInput.value.toUpperCase();
+    const tableBody = document.getElementById('report-body');
+    const rows = tableBody.getElementsByTagName('tr');
+    for (const row of rows) {
+        const nameCell = row.getElementsByTagName('td')[0];
+        if (nameCell) {
+            const nameText = nameCell.textContent || nameCell.innerText;
+            if (nameText.toUpperCase().indexOf(filterText) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    }
+}
