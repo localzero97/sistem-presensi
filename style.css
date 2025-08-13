@@ -51,7 +51,7 @@ table { width: 100%; border-collapse: collapse; margin-top: 20px; }
 th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
 th { background-color: #f2f2f2; font-weight: bold; color: #333; }
 tr:nth-child(even) { background-color: #f9f9f9; }
-.status-terlambat, { color: #ffb700; font-weight: bold; }
+.status-terlambat { color: #ffb700; font-weight: bold; }
 .status-absen { color: #d9534f; font-weight: bold; }
 .status-hadir { color: #5cb85c; }
 .school-logo { max-width: 80px; margin-bottom: 15px; }
