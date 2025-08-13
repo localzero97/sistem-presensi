@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwZsDJenqqweFtEp3B_2n-r85hFD6PBOegyAPlAj6fudJZro1bGmCxUfW6d1S8j6xbA4g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwZS-QC-iejVb4KMK1-TDQposhkZPjAduV8Gy1LvBnNPkMGZab4h5eixi0Pu22OhuJYpw/exec";
 
 // Menangkap semua elemen dari HTML
 const adminLoginContainer = document.getElementById('admin-login-container');
@@ -11,7 +11,7 @@ const reportBody = document.getElementById('report-body');
 const filterInput = document.getElementById('filter-input');
 const togglePasswordGuru = document.getElementById('toggle-password-guru');
 const passwordGuru = document.getElementById('admin-password');
-const reportTableHeader = document.getElementById('report-table-header'); // Elemen kepala tabel
+const reportTableHeader = document.getElementById('report-table-header');
 
 // Variabel global untuk menyimpan status sorting
 let sortColumn = null;
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
-    // **INI BARIS PENTING YANG HILANG DARI FILE ANDA**
     reportTableHeader.addEventListener('click', handleSortTable);
 });
 
